@@ -11,3 +11,10 @@
 
 # ----- METRICS -----
 # TODO: Calculate the metrics (precision, speed, wpm, correct and incorrect letters, etc)
+
+from tkinter import Tk
+from ui import UI
+
+root = Tk()
+ui_obj = UI(root=root)
+ui_obj.keep_open()
