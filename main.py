@@ -1,7 +1,7 @@
 # ----- GRAPHIC USER INTERFACE -----
-# TODO: Create the UI to show the text, app options and few metrics
-# TODO: Create the UI to show the profile information and specific metrics
-# TODO: Create the UI to login and register
+# TODO: Complete the MainUI to show the text, app options and few metrics
+# TODO: Complete the ProfileUI to show the profile information and specific metrics
+# TODO: Complete the LoginUI and the RegisterUI
 
 # ----- FUNCTIONALITY -----
 # TODO: Generate random words for the user to write
@@ -15,6 +15,6 @@
 from tkinter import Tk
 from ui import UI
 
-root = Tk()
-ui_obj = UI(root=root)
+rt = Tk()
+ui_obj = UI(root=rt)
 ui_obj.keep_open()
