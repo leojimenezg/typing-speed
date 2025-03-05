@@ -1,4 +1,5 @@
-from tkinter import Frame, Tk, Button, Entry
+from tkinter import Frame, Tk, Button, Entry, Label
+from typing import cast
 
 
 class RegisterUI(Frame):
@@ -7,26 +8,59 @@ class RegisterUI(Frame):
 
         # Variables to be used
         self.ui = ui
+        self.inputEmail: Entry = cast(Entry, None)
+        self.inputUser: Entry = cast(Entry, None)
+        self.inputPass: Entry = cast(Entry, None)
 
         self.configure_layout()
-
-        # User entries
-        self.inputEmail: Entry = Entry(self)
-        self.inputEmail.grid(row=0, column=0, sticky="nsew")
-        self.inputName: Entry = Entry(self)
-        self.inputName.grid(row=1, column=0, sticky="nsew")
-        self.inputPassword: Entry = Entry(self)
-        self.inputPassword.grid(row=2, column=0, sticky="nsew")
-        # Options buttons
-        self.btnRegister: Button = Button(self, text="Register", command=self.switch_to_main)
-        self.btnRegister.grid(row=3, column=0, sticky="nsew")
-        self.btnMore: Button = Button()
+        self.create_form()
 
     def configure_layout(self) -> None:
         """Configure the main layout and the grid to be used"""
+        self.config(bg=self.ui.styles.get("background_color"))
         self.grid_columnconfigure(tuple(range(1)), weight=1)
-        self.grid_rowconfigure(1, weight=1)
         self.grid(sticky="nsew", padx=10, pady=10)
+
+        return None
+
+    def create_form(self) -> None:
+        """Create and configure the form necessary to register"""
+        formFrame: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", padx=40, pady=60)
+        formFrame.grid(row=0, column=0, sticky="nsew")
+        formFrame.grid_columnconfigure(tuple(range(1)), weight=1)
+
+        emailLabel: Label = Label(formFrame, text="Email", font=self.ui.styles.get("button_font"),
+                                  fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
+        emailLabel.grid(row=0, column=0, sticky="nsew", padx=40, pady=(10, 5))
+        self.inputEmail: Entry = Entry(formFrame, font=self.ui.styles.get("button_font"))
+        self.inputEmail.grid(row=1, column=0, sticky="n", padx=40, pady=20)
+        userLabel: Label = Label(formFrame, text="Username", font=self.ui.styles.get("button_font"),
+                                 fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
+        userLabel.grid(row=2, column=0, sticky="nsew", padx=40, pady=(10, 5))
+        self.inputUser: Entry = Entry(formFrame, font=self.ui.styles.get("button_font"))
+        self.inputUser.grid(row=3, column=0, sticky="n", padx=40, pady=20)
+        passLabel: Label = Label(formFrame, text="Password", font=self.ui.styles.get("button_font"),
+                                 fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
+        passLabel.grid(row=4, column=0, sticky="nsew", padx=40, pady=(10, 5))
+        self.inputPass: Entry = Entry(formFrame, font=self.ui.styles.get("button_font"))
+        self.inputPass.grid(row=5, column=0, sticky="n", padx=40, pady=20)
+
+        buttonsStyles: dict = {
+            "bg": self.ui.styles.get("background_color"),
+            "fg": self.ui.styles.get("button_font_color"),
+            "font": self.ui.styles.get("button_font"),
+            "relief": "flat",
+            "activebackground": self.ui.styles.get("button_active_color"),
+            "padx": 10,
+            "pady": 5,
+            "borderwidth": 0,
+            "cursor": "center_ptr"
+        }
+
+        registerBtn: Button = Button(formFrame, text="Register", command=self.switch_to_main, **buttonsStyles)
+        registerBtn.grid(row=6, column=0, sticky="n", padx=40, pady=(10, 5))
+        setattr(self, "registerButton", registerBtn)
+
         return None
 
     def switch_to_main(self) -> None:

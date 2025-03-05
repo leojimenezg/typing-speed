@@ -6,6 +6,16 @@ from typing import cast
 class UI:
     def __init__(self, root: Tk):
         self.root: Tk = root
+        self.styles: dict = {
+            "background_color": "#cccccc",
+            "button_font": ("Segoe UI", 20, "normal"),
+            "button_font_color": "#000000",
+            "button_active_color": "#3a5a8c",
+            "canvas_color": "#dfdede",
+            "title_label_font": ("Segoe UI", 20, "bold"),
+            "body_label_font": ("Segoe UI", 18, "normal"),
+            "label_font_color": "#000000"
+        }
         self.screenWidth: int = self.get_window_size()[0]
         self.screenHeight: int = self.get_window_size()[1]
         self.currentFrame: Frame = cast(Frame, None)
@@ -17,7 +27,7 @@ class UI:
         }
 
         self.configure_root()
-        self.switch_frame("MainUI")
+        self.switch_frame("LoginUI")
 
     def get_window_size(self) -> tuple:
         """Returns the size of the user's window as a tuple: (width, height)"""
@@ -27,10 +37,11 @@ class UI:
         """Configures the main Tk object (root) for better visualization"""
         self.root.geometry(f"{self.screenWidth}x{self.screenHeight}")
         self.root.state("zoomed")
-        self.root.configure(background="white")
-        self.root.resizable(width=False, height=False)
+        self.root.configure(background=self.styles.get("background_color"))
+        self.root.resizable(width=True, height=True)
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
+
         return None
 
     def switch_frame(self, frameClassName: str) -> None:

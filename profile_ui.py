@@ -1,4 +1,5 @@
-from tkinter import Frame, Tk, Button, Label
+from tkinter import Frame, Tk, Button, Label, Text, END
+from typing import cast
 
 
 class ProfileUI(Frame):
@@ -7,41 +8,112 @@ class ProfileUI(Frame):
 
         # Variables to be used
         self.ui = ui
+        self.textHistory: Text = cast(Text, None)
+        self.wpm30secs: Label = cast(Label, None)
+        self.wpm60secs: Label = cast(Label, None)
+        self.wpm90secs: Label = cast(Label, None)
+        self.wpm120secs: Label = cast(Label, None)
 
         self.configure_layout()
-        # Button to go back to Main
-        self.btnGoTyping = Button(self, text="Go Typing", command=self.switch_to_main,
-                                  bg="#4a7abc", fg="black", font=("Arial", 14, "bold"), relief="flat")
-        self.btnGoTyping.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        # Button LogOut
-        self.btnLogout = Button(self, text="Go Login", command=self.switch_to_login,
-                                bg="#e74c3c", fg="black", font=("Arial", 14, "bold"), relief="flat")
-        self.btnLogout.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
-        # Different metrics indicators
-        self.textWPM = Label(self, text="Words Per Minute: 0",
-                             font=("Arial", 12, "normal"), anchor="w", padx=10, pady=5)
-        self.textWPM.grid(row=1, column=0, columnspan=2, sticky="ew", pady=2)
-        self.textCorrectW = Label(self, text="Total Correct Words: 0",
-                                  font=("Arial", 12, "normal"), anchor="w", padx=10, pady=5)
-        self.textCorrectW.grid(row=2, column=0, columnspan=2, sticky="ew", pady=2)
-        self.textIncorrectW = Label(self, text="Total Incorrect Words: 0",
-                                    font=("Arial", 12, "normal"), anchor="w", padx=10, pady=5)
-        self.textIncorrectW.grid(row=3, column=0, columnspan=2, sticky="ew", pady=2)
-        # History section with frame
-        historyFrame = Frame(self, bd=2, relief="groove", bg="#f5f5f5")
-        historyFrame.grid(row=4, column=0, columnspan=2, sticky="nsew", pady=10)
-        historyFrame.grid_columnconfigure(0, weight=1)
-        historyFrame.grid_rowconfigure(0, weight=1)
-
-        self.textHistory = Label(historyFrame, text="History will appear here",
-                                 bg="#f5f5f5", fg="black", anchor="nw", justify="left", padx=10, pady=10)
-        self.textHistory.grid(row=0, column=0, sticky="nsew")
+        self.create_top_bar()
+        self.create_metric_displays()
 
     def configure_layout(self) -> None:
         """Configure the main layout and the grid to be used"""
-        self.grid_columnconfigure(tuple(range(2)), weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.config(bg=self.ui.styles.get("background_color"))
+        self.grid_columnconfigure(tuple(range(1)), weight=1)
         self.grid(sticky="nsew", padx=10, pady=10)
+
+        return None
+
+    def create_top_bar(self) -> None:
+        """Create and configure the top bar to show the buttons"""
+        topBar: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat")
+        topBar.grid(row=0, column=0, sticky="ew", pady=20)
+        topBar.grid_columnconfigure(tuple(range(7)), weight=1)
+
+        buttonsStyles: dict = {
+            "bg": self.ui.styles.get("background_color"),
+            "fg": self.ui.styles.get("button_font_color"),
+            "font": self.ui.styles.get("button_font"),
+            "relief": "flat",
+            "activebackground": self.ui.styles.get("button_active_color"),
+            "padx": 10,
+            "pady": 5,
+            "borderwidth": 0,
+            "cursor": "center_ptr"
+        }
+        optBtnConfigs: list = [
+            ("Typing", self.switch_to_main, 0),
+            ("Login", self.switch_to_login, 4),
+            ("Logout", self.switch_to_login, 6)
+        ]
+
+        for text, command, col in optBtnConfigs:
+            btn: Button = Button(topBar, text=text, command=command, **buttonsStyles)
+            btn.grid(row=0, column=col, sticky="ew", padx=2, pady=2)
+            setattr(self, f"btn{text}", btn)
+
+        sep1: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
+        sep1.grid(row=0, column=1, columnspan=3, sticky="nsew", padx=5)
+        setattr(self, "separator1", sep1)
+        sep2: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
+        sep2.grid(row=0, column=5, sticky="nsew", padx=5)
+        setattr(self, "separator2", sep2)
+
+        return None
+
+    def create_metric_displays(self) -> None:
+        """Create and configure all the widgets to show the metrics"""
+        metricFrame: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", bd=1)
+        metricFrame.grid(row=1, column=0, sticky="ew", pady=20)
+        metricFrame.grid_columnconfigure(tuple(range(5)), weight=1)
+
+        labelStyles: dict = {
+            "font": self.ui.styles.get("body_label_font"),
+            "fg": self.ui.styles.get("label_font_color"),
+            "bg": self.ui.styles.get("background_color")
+        }
+
+        labelConfigs: list = [
+            ("30s", 0),
+            ("60s", 1),
+            ("90s", 2),
+            ("120s", 3)
+        ]
+
+        label: Label = Label(metricFrame, text="Words Per Time", font=self.ui.styles.get("title_label_font"),
+                             fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
+        label.grid(row=0, column=0, sticky="ew", columnspan=4, padx=10, pady=5)
+        setattr(self, "labelWPT", label)
+
+        for text, column in labelConfigs:
+            label: Label = Label(metricFrame, text=text, **labelStyles)
+            label.grid(row=1, column=column, sticky="nsew", padx=10, pady=5)
+            setattr(self, f"{text}Label", label)
+
+        self.wpm30secs: Label = Label(metricFrame, text="to be appeared", **labelStyles)
+        self.wpm30secs.grid(row=2, column=0, sticky="new", padx=10, pady=5)
+        self.wpm60secs: Label = Label(metricFrame, text="to be appeared", **labelStyles)
+        self.wpm60secs.grid(row=2, column=1, sticky="new", padx=10, pady=5)
+        self.wpm90secs: Label = Label(metricFrame, text="to be appeared", **labelStyles)
+        self.wpm90secs.grid(row=2, column=2, sticky="new", padx=10, pady=5)
+        self.wpm120secs: Label = Label(metricFrame, text="to be appeared", **labelStyles)
+        self.wpm120secs.grid(row=2, column=3, sticky="new", padx=10, pady=5)
+
+        label: Label = Label(metricFrame, text="History", font=self.ui.styles.get("title_label_font"),
+                             fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
+        label.grid(row=0, column=4, sticky="ew", padx=10, pady=5)
+        setattr(self, "labelHistory", label)
+
+        self.textHistory: Text = Text(metricFrame, bg=self.ui.styles.get("background_color"), height=20, width=15,
+                                      relief="sunken", fg=self.ui.styles.get("label_font_color"), wrap="word",
+                                      font=self.ui.styles.get("body_label_font"), highlightthickness=0, bd=1)
+        self.textHistory.grid(row=1, column=4, sticky="new", rowspan=2, padx=10, pady=5)
+
+        self.textHistory.insert(END, "Your typing session history will appear here.")
+        self.textHistory.config(state="disabled")
+
         return None
 
     def switch_to_main(self) -> None:

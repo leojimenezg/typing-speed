@@ -1,7 +1,5 @@
 # ----- GRAPHIC USER INTERFACE -----
-# TODO: Complete the MainUI to show the text, app options and few metrics
-# TODO: Complete the ProfileUI to show the profile information and specific metrics
-# TODO: Complete the LoginUI and the RegisterUI
+# TODO: Change all the styles and appearance from all widgets of all uis
 
 # ----- FUNCTIONALITY -----
 # TODO: Generate random words for the user to write

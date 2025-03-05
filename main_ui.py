@@ -18,6 +18,7 @@ class MainUI(Frame):
 
     def configure_layout(self) -> None:
         """Configure the main layout and the grid to be used"""
+        self.config(bg=self.ui.styles.get("background_color"))
         self.grid_columnconfigure(tuple(range(9)), weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid(sticky="nsew", padx=10, pady=10)
@@ -26,20 +27,20 @@ class MainUI(Frame):
 
     def create_top_bar(self) -> None:
         """Create the top navigation bar with the necessary buttons and separators"""
-        topBar: Frame = Frame(self, bg="#e0e0e0", relief="raised", bd=1)
-        topBar.grid(row=0, column=0, columnspan=9, sticky="ew", pady=(0, 10))
+        topBar: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", bd=1)
+        topBar.grid(row=0, column=0, columnspan=9, sticky="ew", pady=20)
         topBar.grid_columnconfigure(tuple(range(9)), weight=1)
 
         buttonsStyles: dict = {
-            "bg": "#4a7abc",
-            "fg": "black",
-            "font": ("Arial", 10, "bold"),
+            "bg": self.ui.styles.get("background_color"),
+            "fg": self.ui.styles.get("button_font_color"),
+            "font": self.ui.styles.get("button_font"),
             "relief": "flat",
-            "activebackground": "#3a5a8c",
+            "activebackground": self.ui.styles.get("button_active_color"),
             "padx": 10,
             "pady": 5,
             "borderwidth": 0,
-            "cursor": "hand1"
+            "cursor": "center_ptr"
         }
 
         timeBtnConfigs: list = [
@@ -50,11 +51,11 @@ class MainUI(Frame):
         ]
 
         for time, command, col in timeBtnConfigs:
-            btn = Button(topBar, text=time, **buttonsStyles)
+            btn: Button = Button(topBar, text=time, command=command, **buttonsStyles)
             btn.grid(row=0, column=col, sticky="nsew", padx=2, pady=2)
             setattr(self, f"btn{time}", btn)
 
-        sep1: Frame = Frame(topBar, bg="#cccccc", width=2)
+        sep1: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
         sep1.grid(row=0, column=4, sticky="ns", padx=5)
         setattr(self, "separator1", sep1)
 
@@ -64,19 +65,15 @@ class MainUI(Frame):
         ]
 
         for text, command, col in extraBtnConfigs:
-            btn: Button = Button(topBar, text=text, **buttonsStyles)
+            btn: Button = Button(topBar, text=text, command=command, **buttonsStyles)
             btn.grid(row=0, column=col, sticky="nsew", padx=2, pady=2)
             setattr(self, f"btn{text}", btn)
 
-        sep2: Frame = Frame(topBar, bg="#cccccc", width=2)
+        sep2: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
         sep2.grid(row=0, column=7, sticky="ns", padx=5)
         setattr(self, f"separator2", sep2)
 
-        profileStyle: dict = buttonsStyles.copy()
-        profileStyle["bg"] = "#e74c3c"
-        profileStyle["activebackground"] = "#c0392b"
-
-        profile: Button = Button(topBar, text="Profile", command=self.switch_to_profile, **profileStyle)
+        profile: Button = Button(topBar, text="Profile", command=self.switch_to_profile, **buttonsStyles)
         profile.grid(row=0, column=8, sticky="nsew", padx=2, pady=2)
         setattr(self, "btnProfile", profile)
 
@@ -84,29 +81,29 @@ class MainUI(Frame):
 
     def create_canvas(self) -> None:
         """Create and configure the canvas to show the corresponding text"""
-        canvasFrame: Frame = Frame(self, bg="#ffffff", bd=2, relief="ridge")
-        canvasFrame.grid(row=1, column=0, columnspan=9, sticky="nsew", pady=5)
+        canvasFrame: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="sunken")
+        canvasFrame.grid(row=1, column=0, columnspan=9, sticky="nsew", pady=20)
         canvasFrame.grid_columnconfigure(0, weight=1)
         canvasFrame.grid_rowconfigure(0, weight=1)
 
-        self.canvas: Canvas = Canvas(canvasFrame, bg="#ffffff", highlightthickness=0)
+        self.canvas: Canvas = Canvas(canvasFrame, bg=self.ui.styles.get("canvas_color"), highlightthickness=0)
         self.canvas.grid(row=0, column=0, sticky="nsew")
 
         return None
 
     def create_bottom_bar(self) -> None:
         """Create and configure the bottom bar to show few metrics"""
-        statusBar: Frame = Frame(self, bg="#e0e0e0", relief="sunken", bd=1)
-        statusBar.grid(row=2, column=0, columnspan=9, sticky="ew", pady=(10, 0))
+        statusBar: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", bd=1)
+        statusBar.grid(row=2, column=0, columnspan=9, sticky="ew", pady=20)
 
         for i in range(0, 9):
             statusBar.grid_columnconfigure(i, weight=1)
 
         metricStyle: dict = {
-            "font": ("Arial", 10, "normal"),
-            "bg": "#e0e0e0",
+            "font": self.ui.styles.get("button_font"),
+            "bg": self.ui.styles.get("background_color"),
             "padx": 10,
-            "pady": 5
+            "pady": 20
         }
 
         self.textCorrect: Label = Label(statusBar, text="Correct: 0", fg="#27ae60", anchor="w", **metricStyle)
