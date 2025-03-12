@@ -1,4 +1,4 @@
-from tkinter import Frame, Tk, Canvas, Label, Button
+from tkinter import Frame, Tk, Canvas, Label, Button, Event
 from threading import Thread
 from typing import cast
 import time
@@ -19,10 +19,16 @@ class MainUI(Frame):
         self.test_on: bool = False
         self.timer_on: bool = False
 
+        self.bindings: list = [
+            ("<Return>", self.start_typing_test),
+        ]
+        self.bindIds: list = []
+
         self.configure_layout()
         self.create_top_bar()
         self.create_canvas()
         self.create_bottom_bar()
+        self.set_time_variable(30)
 
     def configure_layout(self) -> None:
         """Configure the main layout and the grid to be used"""
@@ -31,6 +37,20 @@ class MainUI(Frame):
         self.grid_rowconfigure(1, weight=1)
         self.grid(sticky="nsew", padx=10, pady=10)
 
+        return None
+
+    def on_frame_activation(self) -> None:
+        """Set the frame's key bindings and save them for later use"""
+        for bind, callback in self.bindings:
+            bindId = self.master.bind(bind, callback)
+            self.bindIds.append((bind, bindId))
+        return None
+
+    def on_frame_deactivation(self) -> None:
+        """Unset the frame's key bindings and clear the list"""
+        for seq, bId in self.bindIds:
+            self.master.unbind(seq, bId)
+        self.bindIds = []
         return None
 
     def create_top_bar(self) -> None:
@@ -125,37 +145,29 @@ class MainUI(Frame):
 
     def switch_to_profile(self) -> None:
         """Switch to profile frame from the main frame"""
-        self.ui.switch_frame(frameClassName="ProfileUI")
+        if not self.test_on:
+            self.ui.switch_frame(frameClassName="ProfileUI")
         return None
 
     def set_time_variable(self, seconds: int) -> None:
         """Change the time used for the tests"""
-        self.seconds = seconds
-        self.textTimer.config(text=f"Time: {self.seconds}s")
-        self.start_timer()
-
+        if not self.test_on:
+            self.seconds = seconds
+            self.textTimer.config(text=f"Time: {self.seconds}s")
         return None
 
     def set_numbers_variable(self) -> None:
         """Change the numbers variable to enable or disable them"""
-        self.numbers = not self.numbers
-        print(f"Numbers are {self.numbers}")
+        if not self.test_on:
+            self.numbers = not self.numbers
+            print(f"Numbers are {self.numbers}")
         return None
 
     def set_specials_variable(self) -> None:
         """Change the specials variable to enable or disable them"""
-        self.specials = not self.specials
-        print(f"Specials are {self.specials}")
-        return None
-
-    def clear_test(self) -> None:
-        """Clear and set the configurations to the initial ones in order to set ready the next test"""
-        self.timer_on = False
-        self.test_on = False
-        self.specials = False
-        self.numbers = False
-        self.seconds = 0
-
+        if not self.test_on:
+            self.specials = not self.specials
+            print(f"Specials are {self.specials}")
         return None
 
     def start_timer(self) -> None:
@@ -169,7 +181,7 @@ class MainUI(Frame):
                 remainingTime -= 1
                 self.textTimer.config(text=f"Time: {remainingTime}s")
             if remainingTime <= 0:
-                self.clear_test()
+                self.timer_on = False
             return None
 
         timerThread: Thread = Thread(target=countdown)
@@ -178,8 +190,35 @@ class MainUI(Frame):
 
         return None
 
-    def start_typing_test(self) -> None:
-        """Start the typing test by showing the words in the canvas"""
-        self.test_on = True
+    def start_typing_test(self, event: Event) -> None:
+        """Start the typing test by setting variables and calling the appropriate functions"""
+        print(f"Test started using {event.keysym} key.")
+        if not self.test_on:
+            self.test_on = True
+            self.start_timer()
+            self.typing_test()
 
         return None
+
+    def finish_typing_test(self) -> None:
+        if self.test_on:
+            print("Typing test stopped")
+            self.clear_test()
+        return None
+
+    def clear_test(self) -> None:
+        """Clear and set the configurations to the initial ones in order to set ready the next test"""
+        self.timer_on = False
+        self.test_on = False
+        self.seconds = 0
+        self.textTimer.config(text="Time: 0")
+        return None
+
+    def typing_test(self) -> None:
+        """Initialize, create and check the typing test"""
+        print("Typing test initialized")
+        while self.timer_on:
+            pass
+        return None
+
+# TODO: implement the actual typing test logic and functionality

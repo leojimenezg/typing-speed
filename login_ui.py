@@ -1,4 +1,4 @@
-from tkinter import Frame, Tk, Button, Entry, Label
+from tkinter import Frame, Tk, Button, Entry, Label, Event
 from typing import cast
 
 
@@ -11,8 +11,17 @@ class LoginUI(Frame):
         self.inputUser: Entry = cast(Entry, None)
         self.inputPass: Entry = cast(Entry, None)
 
+        self.bindings: list = [
+            ("<Return>", self.test),
+        ]
+        self.bindIds: list = []
+
         self.configure_layout()
         self.create_form()
+
+    def test(self, event: Event):
+        print(f"Bind worked from loginUI {event.keysym}")
+        return None
 
     def configure_layout(self) -> None:
         """Configure the main layout and the grid to be used"""
@@ -20,6 +29,20 @@ class LoginUI(Frame):
         self.grid_columnconfigure(tuple(range(1)), weight=1)
         self.grid(sticky="nsew", padx=10, pady=10)
 
+        return None
+
+    def on_frame_activation(self) -> None:
+        """Set the frame's key bindings and save them for later use"""
+        for bind, callback in self.bindings:
+            bindId = self.master.bind(bind, callback)
+            self.bindIds.append((bind, bindId))
+        return None
+
+    def on_frame_deactivation(self) -> None:
+        """Unset the frame's key bindings and clear the list"""
+        for seq, bId in self.bindIds:
+            self.master.unbind(seq, bId)
+        self.bindIds = []
         return None
 
     def create_form(self) -> None:

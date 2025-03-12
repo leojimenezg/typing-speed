@@ -47,6 +47,7 @@ class UI:
     def switch_frame(self, frameClassName: str) -> None:
         """Switch the current frame to the specified one, using the class name (str)"""
         if self.currentFrame is not None:
+            self.currentFrame.on_frame_deactivation()
             self.currentFrame.destroy()
 
         if not isinstance(frameClassName, str):
@@ -60,6 +61,7 @@ class UI:
         frameClass = getattr(module, frameClassName)
 
         self.currentFrame = frameClass(self.root, self)
+        self.currentFrame.on_frame_activation()
         self.currentFrame.grid(row=0, column=0, sticky="nsew")
         self.currentFrame.grid_propagate(False)
 
