@@ -1,5 +1,6 @@
 from tkinter import Frame, Tk, Canvas, Label, Button, Event
 from threading import Thread
+from random import choice
 from typing import cast
 import time
 
@@ -10,6 +11,7 @@ class MainUI(Frame):
 
         self.ui = ui
         self.canvas: Canvas = cast(Canvas, None)
+        self.maxCanvasChars: int = 50
         self.textCorrect: Label = cast(Label, None)
         self.textIncorrect: Label = cast(Label, None)
         self.textTimer: Label = cast(Label, None)
@@ -23,6 +25,7 @@ class MainUI(Frame):
             ("<Return>", self.start_typing_test),
         ]
         self.bindIds: list = []
+        self.words: list = []
 
         self.configure_layout()
         self.create_top_bar()
@@ -195,6 +198,7 @@ class MainUI(Frame):
         print(f"Test started using {event.keysym} key.")
         if not self.test_on:
             self.test_on = True
+            self.initialize_words_array(language="english")
             self.start_timer()
             self.typing_test()
 
@@ -214,11 +218,48 @@ class MainUI(Frame):
         self.textTimer.config(text="Time: 0")
         return None
 
-    def typing_test(self) -> None:
-        """Initialize, create and check the typing test"""
-        print("Typing test initialized")
-        while self.timer_on:
-            pass
+    def initialize_words_array(self, language: str) -> None:
+        """Get all the words from the txt files corresponding to the received language and store them in a list"""
+        with open(file=f"{language}_words.txt", mode="r") as file:
+            self.words: list = [word.replace("\n", "") for word in file.readlines()]
         return None
 
-# TODO: implement the actual typing test logic and functionality
+    def get_random_word(self) -> str:
+        """Return a random word from the initialized list of words"""
+        return choice(self.words)
+
+    def create_text_line(self) -> str:
+        """Return a created line with the right amount of random words in order to be display in the canvas"""
+        line: list = []
+        lastWord: str = ""
+        totalLength: int = 0
+
+        firstWord: str = self.get_random_word()
+        line.append(firstWord)
+        totalLength += len(firstWord)
+        lastWord = firstWord
+
+        while totalLength < self.maxCanvasChars:
+            line.append(" ")
+            totalLength += 1
+            word = self.get_random_word()
+            if word != lastWord:
+                if (totalLength + len(word)) < self.maxCanvasChars:
+                    line.append(word)
+                    totalLength += len(word)
+                    lastWord = word
+                else:
+                    pass
+            else:
+                line.pop()
+
+        return "".join(line)
+
+    def typing_test(self) -> None:
+        """Initialize, create and check the typing test"""
+        self.canvas.create_text(720, 120, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"))
+        self.canvas.create_text(720, 240, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"))
+        self.canvas.create_text(720, 360, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"))
+        self.canvas.create_text(720, 480, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"))
+
+        return None
