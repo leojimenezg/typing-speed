@@ -5,17 +5,13 @@ from typing import cast
 class LoginUI(Frame):
     def __init__(self, master: Tk, ui):
         super().__init__(master)
-
-        # Variables to be used
         self.ui = ui
         self.inputUser: Entry = cast(Entry, None)
         self.inputPass: Entry = cast(Entry, None)
-
         self.bindings: list = [
             ("<Return>", self.test),
         ]
         self.bindIds: list = []
-
         self.configure_layout()
         self.create_form()
 
@@ -28,7 +24,6 @@ class LoginUI(Frame):
         self.config(bg=self.ui.styles.get("background_color"))
         self.grid_columnconfigure(tuple(range(1)), weight=1)
         self.grid(sticky="nsew", padx=10, pady=10)
-
         return None
 
     def on_frame_activation(self) -> None:
@@ -50,7 +45,6 @@ class LoginUI(Frame):
         formFrame: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", padx=40, pady=60)
         formFrame.grid(row=0, column=0, sticky="nsew")
         formFrame.grid_columnconfigure(tuple(range(1)), weight=1)
-
         userLabel: Label = Label(formFrame, text="Username", font=self.ui.styles.get("button_font"),
                                  fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
         userLabel.grid(row=0, column=0, sticky="nsew", padx=40, pady=(10, 5))
@@ -61,7 +55,6 @@ class LoginUI(Frame):
         passLabel.grid(row=2, column=0, sticky="nsew", padx=40, pady=(10, 5))
         self.inputPass: Entry = Entry(formFrame, font=self.ui.styles.get("button_font"))
         self.inputPass.grid(row=3, column=0, sticky="n", padx=40, pady=20)
-
         buttonsStyles: dict = {
             "bg": self.ui.styles.get("background_color"),
             "fg": self.ui.styles.get("button_font_color"),
@@ -77,12 +70,10 @@ class LoginUI(Frame):
             ("  Login   ", self.switch_to_main, 4),
             ("Register", self.switch_to_register, 5)
         ]
-
         for text, command, row in btnOptions:
             btn: Button = Button(formFrame, text=text, command=command, **buttonsStyles)
             btn.grid(row=row, column=0, sticky="n", padx=40, pady=(10, 5))
             setattr(self, f"{text}Button", btn)
-
         return None
 
     def switch_to_main(self) -> None:

@@ -14,7 +14,8 @@ class UI:
             "canvas_color": "#dfdede",
             "title_label_font": ("Segoe UI", 20, "bold"),
             "body_label_font": ("Segoe UI", 18, "normal"),
-            "label_font_color": "#000000"
+            "label_font_color": "#000000",
+            "canvas_label_font": ("Segoe UI", 50, "normal"),
         }
         self.screenWidth: int = self.get_window_size()[0]
         self.screenHeight: int = self.get_window_size()[1]
@@ -25,9 +26,8 @@ class UI:
             "LoginUI": "login_ui",
             "RegisterUI": "register_ui"
         }
-
         self.configure_root()
-        self.switch_frame("LoginUI")
+        self.switch_frame("MainUI")
 
     def get_window_size(self) -> tuple:
         """Returns the size of the user's window as a tuple: (width, height)"""
@@ -41,7 +41,6 @@ class UI:
         self.root.resizable(width=True, height=True)
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
-
         return None
 
     def switch_frame(self, frameClassName: str) -> None:
@@ -49,24 +48,18 @@ class UI:
         if self.currentFrame is not None:
             self.currentFrame.on_frame_deactivation()
             self.currentFrame.destroy()
-
         if not isinstance(frameClassName, str):
             raise ValueError(f"The received value of 'frameClassName' is not a string object: {frameClassName}")
-
         moduleName = self.moduleDict.get(frameClassName)
         if not moduleName:
             raise ValueError(f"The given class name does not exist or isn't valid: '{frameClassName}'")
-
         module = import_module(moduleName)
         frameClass = getattr(module, frameClassName)
-
         self.currentFrame = frameClass(self.root, self)
         self.currentFrame.on_frame_activation()
         self.currentFrame.grid(row=0, column=0, sticky="nsew")
         self.currentFrame.grid_propagate(False)
-
         self.root.update_idletasks()
-
         return None
 
     def keep_open(self) -> None:
