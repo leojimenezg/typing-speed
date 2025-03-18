@@ -1,6 +1,6 @@
 from tkinter import Frame, Tk, Canvas, Label, Button, Event
 from threading import Thread
-from random import choice
+from random import choice, randint
 from typing import cast
 import time
 
@@ -11,6 +11,8 @@ class MainUI(Frame):
         self.ui = ui
         self.canvas: Canvas = cast(Canvas, None)
         self.maxCanvasChars: int = 50
+        self.maxLineSpecials: int = 2
+        self.maxLineNumbers: int = 2
         self.textCorrect: Label = cast(Label, None)
         self.textIncorrect: Label = cast(Label, None)
         self.textTimer: Label = cast(Label, None)
@@ -24,7 +26,9 @@ class MainUI(Frame):
             ("<Escape>", self.finish_typing_test)
         ]
         self.bindIds: list = []
-        self.words: list = []
+        self.wordsList: list = []
+        self.specialsList: list = []
+        self.numbersList: list = []
         self.configure_layout()
         self.create_top_bar()
         self.create_canvas()
@@ -145,14 +149,12 @@ class MainUI(Frame):
         """Change the numbers variable to enable or disable them"""
         if not self.test_on:
             self.numbers = not self.numbers
-            print(f"Numbers are {self.numbers}")
         return None
 
     def set_specials_variable(self) -> None:
         """Change the specials variable to enable or disable them"""
         if not self.test_on:
             self.specials = not self.specials
-            print(f"Specials are {self.specials}")
         return None
 
     def start_timer(self) -> None:
@@ -179,7 +181,11 @@ class MainUI(Frame):
         if not self.test_on and not self.timer_on:
             print(f"Test started using {event.keysym} key.")
             self.test_on = True
-            self.initialize_words_array(language="english")
+            self.fill_words_list(language="english")
+            if self.specials:
+                self.fill_specials_list()
+            if self.numbers:
+                self.fill_numbers_list()
             self.start_timer()
             self.typing_test()
         return None
@@ -193,33 +199,53 @@ class MainUI(Frame):
 
     def clear_test(self) -> None:
         """Clear and set the configurations to the initial ones in order to set ready the next test"""
+        self.canvas.delete("all")
+        self.textTimer.config(text=f"Time: {self.seconds}s")
         self.timer_on = False
         self.test_on = False
-        self.textTimer.config(text=f"Time: {self.seconds}s")
-        self.canvas.delete("all")
+        self.wordsList = []
+        self.specialsList = []
+        self.numbersList = []
         return None
 
-    def initialize_words_array(self, language: str) -> None:
+    def fill_words_list(self, language: str) -> None:
         """Get all the words from the txt files corresponding to the received language and store them in a list"""
         with open(file=f"{language}_words.txt", mode="r") as file:
-            self.words: list = [word.replace("\n", "") for word in file.readlines()]
+            self.wordsList: list = [word.replace("\n", "") for word in file.readlines()]
+        return None
+
+    def fill_specials_list(self) -> None:
+        """Get all special characters from the txt file and store them in a list"""
+        with open(file="specials_file.txt", mode="r") as file:
+            self.specialsList: list = [special.replace("\n", "") for special in file.readlines()]
+        return None
+
+    def fill_numbers_list(self) -> None:
+        """Get all numbers from the txt file and store them in a list"""
+        with open(file="numbers_file.txt", mode="r") as file:
+            self.numbersList: list = [number.replace("\n", "") for number in file.readlines()]
         return None
 
     def get_random_word(self) -> str:
-        """Return a random word from the initialized list of words"""
-        return choice(self.words)
+        """Return a random word from the initialized list"""
+        return choice(self.wordsList)
+
+    def get_randon_special(self) -> str:
+        """Return a random special character from the initialized list"""
+        return choice(self.specialsList)
+
+    def get_random_number(self) -> str:
+        """Return a random number from the initialized list"""
+        return choice(self.numbersList)
 
     def create_text_line(self) -> str:
         """Return a created line with the right amount of random words in order to be display in the canvas"""
         line: list = []
         totalLength: int = 0
-        firstWord: str = self.get_random_word()
-        line.append(firstWord)
-        totalLength += len(firstWord)
-        lastWord = firstWord
+        lastWord = self.get_random_word()
+        line.append(lastWord)
+        totalLength += len(lastWord)
         while totalLength < self.maxCanvasChars:
-            line.append(" ")
-            totalLength += 1
             word = self.get_random_word()
             if word != lastWord:
                 if (totalLength + len(word)) < self.maxCanvasChars:
@@ -227,10 +253,41 @@ class MainUI(Frame):
                     totalLength += len(word)
                     lastWord = word
                 else:
+                    totalLength += 1
+        if self.specials and self.numbers:
+            counter: int = 0
+            lineLength: int = len(line) - 1
+            while counter < self.maxLineSpecials + self.maxLineNumbers:
+                randIndex = randint(0, lineLength)
+                if line[randIndex] in self.wordsList:
+                    if counter % 2 == 0:
+                        line[randIndex] = self.get_randon_special()
+                    else:
+                        line[randIndex] = self.get_random_number()
+                    counter += 1
+                else:
                     pass
-            else:
-                line.pop()
-        return "".join(line)
+        elif self.specials:
+            counter: int = 0
+            lineLength: int = len(line) - 1
+            while counter < self.maxLineSpecials:
+                randIndex = randint(0, lineLength)
+                if line[randIndex] in self.wordsList:
+                    line[randIndex] = self.get_randon_special()
+                    counter += 1
+                else:
+                    pass
+        elif self.numbers:
+            counter: int = 0
+            lineLength: int = len(line) - 1
+            while counter < self.maxLineNumbers:
+                randIndex = randint(0, lineLength)
+                if line[randIndex] in self.wordsList:
+                    line[randIndex] = self.get_random_number()
+                    counter += 1
+                else:
+                    pass
+        return " ".join(line)
 
     def typing_test(self) -> None:
         """Initialize, create and check the typing test"""
