@@ -38,7 +38,7 @@ class UI:
         self.root.geometry(f"{self.screenWidth}x{self.screenHeight}")
         self.root.state("zoomed")
         self.root.configure(background=self.styles.get("background_color"))
-        self.root.resizable(width=True, height=True)
+        self.root.resizable(width=False, height=False)
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
         return None
