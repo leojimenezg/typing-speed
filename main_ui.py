@@ -10,6 +10,7 @@ class MainUI(Frame):
         super().__init__(master)
         self.ui = ui
         self.canvas: Canvas = cast(Canvas, None)
+        self.canvasTextId: int = cast(int, None)
         self.maxCanvasChars: int = 50
         self.maxLineSpecials: int = 2
         self.maxLineNumbers: int = 2
@@ -23,7 +24,8 @@ class MainUI(Frame):
         self.timer_on: bool = False
         self.bindings: list = [
             ("<Return>", self.start_typing_test),
-            ("<Escape>", self.finish_typing_test)
+            ("<Escape>", self.finish_typing_test),
+            ("<KeyPress>", self.check_typing),
         ]
         self.bindIds: list = []
         self.wordsList: list = []
@@ -291,20 +293,18 @@ class MainUI(Frame):
 
     def typing_test(self) -> None:
         """Initialize, create and check the typing test"""
-        line1 = self.canvas.create_text(
-            720, 120, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color")
-        )
-        line2 = self.canvas.create_text(
-            720, 240, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color")
-        )
-        line3 = self.canvas.create_text(
-            720, 360, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color")
-        )
-        line4 = self.canvas.create_text(
-            720, 480, text=self.create_text_line(), font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color")
+        textLines = [
+            self.create_text_line(), self.create_text_line(), self.create_text_line(), self.create_text_line()
+        ]
+        fullText = "\n\n".join(textLines)
+        self.canvasTextId = self.canvas.create_text(
+            700, 300, text=fullText, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"), justify="center"
         )
         return None
+
+    def check_typing(self, event: Event) -> None:
+        """Check the canvas text when a key is pressed to compare if the key is correct or not"""
+        if event.keysym in [self.bindings[0][0], self.bindings[1][0]]:
+            return None
+        print(self.canvas.itemcget(self.canvasTextId, "text"))
