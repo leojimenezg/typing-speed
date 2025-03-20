@@ -11,11 +11,11 @@ class MainUI(Frame):
         self.ui = ui
         self.canvas: Canvas = cast(Canvas, None)
         self.canvasTextId: int = cast(int, None)
-        self.maxCanvasChars: int = 50
-        self.maxLineSpecials: int = 2
-        self.maxLineNumbers: int = 2
+        self.canvasTextIndex: int = 0
+        self.maxChars: dict = {"canvas": 40, "specials": 2, "numbers": 2}
         self.textCorrect: Label = cast(Label, None)
         self.textIncorrect: Label = cast(Label, None)
+        self.textCounter: list = [0, 0]  # [correct, incorrect]
         self.textTimer: Label = cast(Label, None)
         self.seconds: int = 0
         self.numbers: bool = False
@@ -26,6 +26,10 @@ class MainUI(Frame):
             ("<Return>", self.start_typing_test),
             ("<Escape>", self.finish_typing_test),
             ("<KeyPress>", self.check_typing),
+        ]
+        self.forbiddenKeys: list = [
+            "Return", "Escape", "Shift_L", "Shift_R", "Alt_L", "Alt_R", "Caps_Lock", "Control_L", "Control_R",
+            "Delete", "Tab", "BackSpace", "Meta_L", "Meta_R",
         ]
         self.bindIds: list = []
         self.wordsList: list = []
@@ -203,8 +207,13 @@ class MainUI(Frame):
         """Clear and set the configurations to the initial ones in order to set ready the next test"""
         self.canvas.delete("all")
         self.textTimer.config(text=f"Time: {self.seconds}s")
+        self.textCorrect.config(text="Correct: ")
+        self.textIncorrect.config(text="Incorrect: ")
         self.timer_on = False
         self.test_on = False
+        self.canvasTextId = None
+        self.canvasTextIndex = 0
+        self.textCounter = [0, 0]
         self.wordsList = []
         self.specialsList = []
         self.numbersList = []
@@ -247,10 +256,10 @@ class MainUI(Frame):
         lastWord = self.get_random_word()
         line.append(lastWord)
         totalLength += len(lastWord)
-        while totalLength < self.maxCanvasChars:
+        while totalLength < self.maxChars.get("canvas"):
             word = self.get_random_word()
             if word != lastWord:
-                if (totalLength + len(word)) < self.maxCanvasChars:
+                if (totalLength + len(word)) < self.maxChars.get("canvas"):
                     line.append(word)
                     totalLength += len(word)
                     lastWord = word
@@ -259,7 +268,7 @@ class MainUI(Frame):
         if self.specials and self.numbers:
             counter: int = 0
             lineLength: int = len(line) - 1
-            while counter < self.maxLineSpecials + self.maxLineNumbers:
+            while counter < self.maxChars.get("specials") + self.maxChars.get("numbers"):
                 randIndex = randint(0, lineLength)
                 if line[randIndex] in self.wordsList:
                     if counter % 2 == 0:
@@ -272,7 +281,7 @@ class MainUI(Frame):
         elif self.specials:
             counter: int = 0
             lineLength: int = len(line) - 1
-            while counter < self.maxLineSpecials:
+            while counter < self.maxChars.get("specials"):
                 randIndex = randint(0, lineLength)
                 if line[randIndex] in self.wordsList:
                     line[randIndex] = self.get_randon_special()
@@ -282,7 +291,7 @@ class MainUI(Frame):
         elif self.numbers:
             counter: int = 0
             lineLength: int = len(line) - 1
-            while counter < self.maxLineNumbers:
+            while counter < self.maxChars.get("numbers"):
                 randIndex = randint(0, lineLength)
                 if line[randIndex] in self.wordsList:
                     line[randIndex] = self.get_random_number()
@@ -305,6 +314,25 @@ class MainUI(Frame):
 
     def check_typing(self, event: Event) -> None:
         """Check the canvas text when a key is pressed to compare if the key is correct or not"""
-        if event.keysym in [self.bindings[0][0], self.bindings[1][0]]:
-            return None
-        print(self.canvas.itemcget(self.canvasTextId, "text"))
+        if self.test_on and self.timer_on:
+            if event.keysym in self.forbiddenKeys:
+                return None
+            text: str = self.canvas.itemcget(self.canvasTextId, "text")
+            while text[self.canvasTextIndex] == "\n":
+                self.canvasTextIndex += 1
+            if event.char == text[self.canvasTextIndex]:
+                self.textCounter[0] += 1
+                self.update_text_counter(0)
+            else:
+                self.textCounter[1] += 1
+                self.update_text_counter(1)
+            self.canvasTextIndex += 1
+        return None
+
+    def update_text_counter(self, index: int) -> None:
+        """Update the text labels that show the correct and incorrect counters, according to the received index"""
+        if index == 0:
+            self.textCorrect.config(text=f"Correct: {self.textCounter[index]}")
+        else:
+            self.textIncorrect.config(text=f"Incorrect: {self.textCounter[index]}")
+        return None
