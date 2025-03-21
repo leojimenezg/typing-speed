@@ -1,4 +1,4 @@
-from tkinter import Frame, Tk, Canvas, Label, Button, Event
+from tkinter import Frame, Tk, Canvas, Label, Button, Event, OptionMenu, StringVar
 from threading import Thread
 from random import choice, randint
 from typing import cast
@@ -35,6 +35,9 @@ class MainUI(Frame):
         self.wordsList: list = []
         self.specialsList: list = []
         self.numbersList: list = []
+        self.language: StringVar = StringVar(self)
+        self.language.set("english")
+        self.availableLangs: list = ["english", "spanish"]
         self.configure_layout()
         self.create_top_bar()
         self.create_canvas()
@@ -66,7 +69,7 @@ class MainUI(Frame):
     def create_top_bar(self) -> None:
         """Create the top navigation bar with the necessary buttons and separators"""
         topBar: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", bd=1)
-        topBar.grid(row=0, column=0, columnspan=9, sticky="ew", pady=20)
+        topBar.grid(row=0, column=0, columnspan=10, sticky="ew", pady=20)
         topBar.grid_columnconfigure(tuple(range(9)), weight=1)
         buttonsStyles: dict = {
             "bg": self.ui.styles.get("background_color"),
@@ -92,19 +95,33 @@ class MainUI(Frame):
         sep1: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
         sep1.grid(row=0, column=4, sticky="ns", padx=5)
         setattr(self, "separator1", sep1)
+        optionMenu: OptionMenu = OptionMenu(topBar, self.language, *self.availableLangs)
+        optionMenu.config(
+            bg=self.ui.styles.get("background_color"),
+            fg=self.ui.styles.get("button_font_color"), activebackground=self.ui.styles.get("button_active_color"),
+            highlightthickness=0, relief="flat", padx=10, pady=5
+        )
+        menu = optionMenu.nametowidget(optionMenu.menuname)
+        menu.config(
+            font=self.ui.styles.get("button_font"), bg=self.ui.styles.get("background_color"),
+            fg=self.ui.styles.get("button_font_color"), activebackground=self.ui.styles.get("button_active_color"),
+            activeforeground="white", bd=2
+        )
+        optionMenu.grid(row=0, column=5, sticky="nsew", padx=2, pady=2)
+        setattr(self, "optionMenu", optionMenu)
         extraBtnConfigs: list = [
-            ("Specials", self.set_specials_variable, 5),
-            ("Numbers", self.set_numbers_variable, 6)
+            ("Specials", self.set_specials_variable, 6),
+            ("Numbers", self.set_numbers_variable, 7)
         ]
         for text, command, col in extraBtnConfigs:
             btn: Button = Button(topBar, text=text, command=command, **buttonsStyles)
             btn.grid(row=0, column=col, sticky="nsew", padx=2, pady=2)
             setattr(self, f"btn{text}", btn)
         sep2: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
-        sep2.grid(row=0, column=7, sticky="ns", padx=5)
+        sep2.grid(row=0, column=8, sticky="ns", padx=5)
         setattr(self, f"separator2", sep2)
         profile: Button = Button(topBar, text="Profile", command=self.switch_to_profile, **buttonsStyles)
-        profile.grid(row=0, column=8, sticky="nsew", padx=2, pady=2)
+        profile.grid(row=0, column=9, sticky="nsew", padx=2, pady=2)
         setattr(self, "btnProfile", profile)
         return None
 
@@ -187,7 +204,7 @@ class MainUI(Frame):
         if not self.test_on and not self.timer_on:
             print(f"Test started using {event.keysym} key.")
             self.test_on = True
-            self.fill_words_list(language="english")
+            self.fill_words_list()
             if self.specials:
                 self.fill_specials_list()
             if self.numbers:
@@ -219,9 +236,9 @@ class MainUI(Frame):
         self.numbersList = []
         return None
 
-    def fill_words_list(self, language: str) -> None:
+    def fill_words_list(self) -> None:
         """Get all the words from the txt files corresponding to the received language and store them in a list"""
-        with open(file=f"{language}_words.txt", mode="r") as file:
+        with open(file=f"{self.language.get()}_words.txt", mode="r") as file:
             self.wordsList: list = [word.replace("\n", "") for word in file.readlines()]
         return None
 
@@ -336,3 +353,6 @@ class MainUI(Frame):
         else:
             self.textIncorrect.config(text=f"Incorrect: {self.textCounter[index]}")
         return None
+
+# TODO: add a way to indicate the progress and current checking position. It might not be possible using a single
+#  text object, maybe creating an object per character would work but it would not be very efficient
