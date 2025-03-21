@@ -353,6 +353,3 @@ class MainUI(Frame):
         else:
             self.textIncorrect.config(text=f"Incorrect: {self.textCounter[index]}")
         return None
-
-# TODO: add a way to indicate the progress and current checking position. It might not be possible using a single
-#  text object, maybe creating an object per character would work but it would not be very efficient
