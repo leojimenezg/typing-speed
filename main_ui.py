@@ -11,6 +11,7 @@ class MainUI(Frame):
         self.ui = ui
         self.canvas: Canvas = cast(Canvas, None)
         self.canvasTextId: int = cast(int, None)
+        self.canvasText: str = cast(str, None)
         self.canvasTextIndex: int = 0
         self.maxChars: dict = {"canvas": 40, "specials": 2, "numbers": 2}
         self.textCorrect: Label = cast(Label, None)
@@ -222,18 +223,22 @@ class MainUI(Frame):
 
     def clear_test(self) -> None:
         """Clear and set the configurations to the initial ones in order to set ready the next test"""
-        self.canvas.delete("all")
+        self.clear_canvas()
         self.textTimer.config(text=f"Time: {self.seconds}s")
         self.textCorrect.config(text="Correct: ")
         self.textIncorrect.config(text="Incorrect: ")
         self.timer_on = False
         self.test_on = False
-        self.canvasTextId = None
-        self.canvasTextIndex = 0
         self.textCounter = [0, 0]
         self.wordsList = []
         self.specialsList = []
         self.numbersList = []
+        return None
+
+    def clear_canvas(self) -> None:
+        self.canvas.delete("all")
+        self.canvasTextId = None
+        self.canvasTextIndex = 0
         return None
 
     def fill_words_list(self) -> None:
@@ -323,6 +328,7 @@ class MainUI(Frame):
             self.create_text_line(), self.create_text_line(), self.create_text_line(), self.create_text_line()
         ]
         fullText = "\n\n".join(textLines)
+        self.canvasText = fullText
         self.canvasTextId = self.canvas.create_text(
             700, 300, text=fullText, font=self.ui.styles.get("canvas_label_font"),
             fill=self.ui.styles.get("label_font_color"), justify="center"
@@ -334,16 +340,18 @@ class MainUI(Frame):
         if self.test_on and self.timer_on:
             if event.keysym in self.forbiddenKeys:
                 return None
-            text: str = self.canvas.itemcget(self.canvasTextId, "text")
-            while text[self.canvasTextIndex] == "\n":
+            while self.canvasText[self.canvasTextIndex] == "\n":
                 self.canvasTextIndex += 1
-            if event.char == text[self.canvasTextIndex]:
+            if event.char == self.canvasText[self.canvasTextIndex]:
                 self.textCounter[0] += 1
                 self.update_text_counter(0)
             else:
                 self.textCounter[1] += 1
                 self.update_text_counter(1)
             self.canvasTextIndex += 1
+            if self.canvasTextIndex >= len(self.canvasText):
+                self.clear_canvas()
+                self.typing_test()
         return None
 
     def update_text_counter(self, index: int) -> None:
