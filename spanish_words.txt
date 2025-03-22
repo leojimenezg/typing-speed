@@ -18,7 +18,7 @@ se
 las
 lo
 como
-más
+mas
 o
 pero
 sus
@@ -43,7 +43,6 @@ sobre
 tambien
 me
 hasta
-año
 dos
 asi
 puede
@@ -105,7 +104,7 @@ mesa
 silla
 arbol
 rio
-montana
+montaña
 camino
 cielo
 sol
@@ -164,7 +163,6 @@ manana
 ayer
 semana
 mes
-ano
 siglo
 hora
 minuto
@@ -178,14 +176,14 @@ hija
 familia
 amigo
 amiga
-nino
-nina
+niño
+niña
 hombre
 mujer
 chico
 chica
-senor
-senora
+señor
+señora
 trabajo
 escuela
 universidad
