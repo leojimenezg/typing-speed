@@ -2,6 +2,7 @@ from tkinter import Frame, Tk, Canvas, Label, Button, Event, OptionMenu, StringV
 from threading import Thread
 from random import choice, randint
 from typing import cast
+from math import floor
 import time
 
 
@@ -193,6 +194,7 @@ class MainUI(Frame):
                 self.textTimer.config(text=f"Time: {remainingTime}s")
             if remainingTime <= 0:
                 self.timer_on = False
+                self.show_test_results()
             return None
 
         timerThread: Thread = Thread(target=countdown)
@@ -218,6 +220,7 @@ class MainUI(Frame):
         """Finish the typing test only if a typing test has been started and the timer has ended"""
         if self.test_on and not self.timer_on:
             print(f"Typing test finished using {event.keysym} key.")
+            self.test_on = False
             self.clear_test()
         return None
 
@@ -236,6 +239,7 @@ class MainUI(Frame):
         return None
 
     def clear_canvas(self) -> None:
+        """Clear all the canvas content and the related variables to it"""
         self.canvas.delete("all")
         self.canvasTextId = None
         self.canvasTextIndex = 0
@@ -361,3 +365,49 @@ class MainUI(Frame):
         else:
             self.textIncorrect.config(text=f"Incorrect: {self.textCounter[index]}")
         return None
+
+    def show_test_results(self) -> None:
+        """Show in the canvas the results of the typing test once the timer is finished"""
+        self.clear_canvas()
+        language: str = f"Language: {self.language.get()}"
+        self.canvas.create_text(
+            400, 200, text=language, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"), justify="center"
+        )
+        incorrect: str = f"Incorrect: {self.textCounter[1]}"
+        self.canvas.create_text(
+            400, 400, text=incorrect, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"), justify="center"
+        )
+
+        raw: str = f"Raw: {self.textCounter[0] + self.textCounter[1]}"
+        self.canvas.create_text(
+            750, 200, text=raw, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"), justify="center"
+        )
+        wpm: str = f"WPM: {self.calculate_wpm()}"
+        self.canvas.create_text(
+            750, 400, text=wpm, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"), justify="center"
+        )
+
+        seconds: str = f"Seconds: {self.seconds}"
+        self.canvas.create_text(
+            1100, 200, text=seconds, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"), justify="center"
+        )
+        correct: str = f"Correct: {self.textCounter[0]}"
+        self.canvas.create_text(
+            1100, 400, text=correct, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"), justify="center"
+        )
+        return None
+
+    def calculate_wpm(self) -> int:
+        """Calculate the wpm using the total of correct characters written in the selected time"""
+        if self.textCounter[0] != 0:
+            wpm = floor((self.textCounter[0] / 5) * (60 / self.seconds))
+            return wpm
+        return 0
+
+# TODO: Make a way to show or follow the current character in the canvas text
