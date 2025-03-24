@@ -7,15 +7,17 @@ class UI:
     def __init__(self, root: Tk):
         self.root: Tk = root
         self.styles: dict = {
-            "background_color": "#cccccc",
+            "background_color": "#CCCCCC",
             "button_font": ("Segoe UI", 20, "normal"),
             "button_font_color": "#000000",
-            "button_active_color": "#3a5a8c",
-            "canvas_color": "#dfdede",
+            "button_active_color": "#3A5A8C",
+            "canvas_color": "#DfDEDE",
             "title_label_font": ("Segoe UI", 20, "bold"),
             "body_label_font": ("Segoe UI", 18, "normal"),
             "label_font_color": "#000000",
             "canvas_label_font": ("Segoe UI", 50, "normal"),
+            "canvas_guide_font": ("Segoe UI", 40, "italic"),
+            "guide_font_color": "#50a5ff"
         }
         self.screenWidth: int = self.get_window_size()[0]
         self.screenHeight: int = self.get_window_size()[1]
