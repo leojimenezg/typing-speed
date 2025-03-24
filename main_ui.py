@@ -11,9 +11,11 @@ class MainUI(Frame):
         super().__init__(master)
         self.ui = ui
         self.canvas: Canvas = cast(Canvas, None)
-        self.canvasTextId: int = cast(int, None)
-        self.canvasText: str = cast(str, None)
+        self.canvasTextId: int = 0
+        self.canvasText: str = ""
         self.canvasTextIndex: int = 0
+        self.canvasGuideId: int = 0
+        self.canvasGuideIndex: int = 1  # Represents the line user is currently
         self.maxChars: dict = {"canvas": 40, "specials": 2, "numbers": 2}
         self.textCorrect: Label = cast(Label, None)
         self.textIncorrect: Label = cast(Label, None)
@@ -213,7 +215,7 @@ class MainUI(Frame):
             if self.numbers:
                 self.fill_numbers_list()
             self.start_timer()
-            self.typing_test()
+            self.typing_test_text()
         return None
 
     def finish_typing_test(self, event: Event) -> None:
@@ -243,6 +245,8 @@ class MainUI(Frame):
         self.canvas.delete("all")
         self.canvasTextId = None
         self.canvasTextIndex = 0
+        self.canvasGuideId = None
+        self.canvasGuideIndex = 1
         return None
 
     def fill_words_list(self) -> None:
@@ -326,16 +330,27 @@ class MainUI(Frame):
                     pass
         return " ".join(line)
 
-    def typing_test(self) -> None:
-        """Initialize, create and check the typing test"""
+    def typing_test_text(self) -> None:
+        """Initialize and create the text in the canvas for the typing test"""
         textLines = [
             self.create_text_line(), self.create_text_line(), self.create_text_line(), self.create_text_line()
         ]
         fullText = "\n\n".join(textLines)
         self.canvasText = fullText
         self.canvasTextId = self.canvas.create_text(
-            700, 300, text=fullText, font=self.ui.styles.get("canvas_label_font"),
+            700, 370, text=fullText, font=self.ui.styles.get("canvas_label_font"),
             fill=self.ui.styles.get("label_font_color"), justify="center"
+        )
+        self.typing_test_guide()
+        return None
+
+    def typing_test_guide(self) -> None:
+        """Initialize and create the guide in the canvas for the typing text"""
+        guide: str = f"Line: {self.canvasGuideIndex}   "
+        guide += f"Next character: {self.canvasText[self.canvasTextIndex]}"
+        self.canvasGuideId = self.canvas.create_text(
+            700, 80, text=guide, font=self.ui.styles.get("canvas_guide_font"),
+            fill=self.ui.styles.get("guide_font_color"), justify="center"
         )
         return None
 
@@ -355,7 +370,8 @@ class MainUI(Frame):
             self.canvasTextIndex += 1
             if self.canvasTextIndex >= len(self.canvasText):
                 self.clear_canvas()
-                self.typing_test()
+                self.typing_test_text()
+            self.update_guide()
         return None
 
     def update_text_counter(self, index: int) -> None:
@@ -364,6 +380,14 @@ class MainUI(Frame):
             self.textCorrect.config(text=f"Correct: {self.textCounter[index]}")
         else:
             self.textIncorrect.config(text=f"Incorrect: {self.textCounter[index]}")
+        return None
+
+    # TODO: check how to update the guide when there are line breaks. And update the line index
+    def update_guide(self) -> None:
+        """Update the canvas text guide as a whole single text"""
+        updatedGuide: str = f"Line: {self.canvasGuideIndex}   "
+        updatedGuide += f"Next character: {self.canvasText[self.canvasTextIndex]}"
+        self.canvas.itemconfig(self.canvasGuideId, text=updatedGuide)
         return None
 
     def show_test_results(self) -> None:
@@ -409,5 +433,3 @@ class MainUI(Frame):
             wpm = floor((self.textCounter[0] / 5) * (60 / self.seconds))
             return wpm
         return 0
-
-# TODO: Make a way to show or follow the current character in the canvas text
