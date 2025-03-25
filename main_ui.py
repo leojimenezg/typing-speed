@@ -382,11 +382,14 @@ class MainUI(Frame):
             self.textIncorrect.config(text=f"Incorrect: {self.textCounter[index]}")
         return None
 
-    # TODO: check how to update the guide when there are line breaks. And update the line index
     def update_guide(self) -> None:
         """Update the canvas text guide as a whole single text"""
+        textIndex = self.canvasTextIndex
+        if self.canvasText[textIndex] == "\n":
+            textIndex += 2
+            self.canvasGuideIndex += 1
         updatedGuide: str = f"Line: {self.canvasGuideIndex}   "
-        updatedGuide += f"Next character: {self.canvasText[self.canvasTextIndex]}"
+        updatedGuide += f"Next character: {self.canvasText[textIndex]}"
         self.canvas.itemconfig(self.canvasGuideId, text=updatedGuide)
         return None
 
