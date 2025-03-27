@@ -85,3 +85,7 @@ class LoginUI(Frame):
         """Switch to register frame from the login frame"""
         self.ui.switch_frame(frameClassName="RegisterUI")
         return None
+
+    def check_login_form(self) -> None:
+        """Check and verify the form inputs in order to validate the credentials"""
+        return None

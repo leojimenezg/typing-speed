@@ -72,7 +72,7 @@ class RegisterUI(Frame):
             "borderwidth": 0,
             "cursor": "center_ptr"
         }
-        registerBtn: Button = Button(formFrame, text="Register", command=self.switch_to_main, **buttonsStyles)
+        registerBtn: Button = Button(formFrame, text="Register", command=self.check_register_form, **buttonsStyles)
         registerBtn.grid(row=6, column=0, sticky="n", padx=40, pady=(10, 5))
         setattr(self, "registerButton", registerBtn)
         return None
@@ -80,4 +80,8 @@ class RegisterUI(Frame):
     def switch_to_main(self) -> None:
         """Switch to main frame from the register frame"""
         self.ui.switch_frame(frameClassName="MainUI")
+        return None
+
+    def check_register_form(self) -> None:
+        """Check and validate the form inputs in order to create new access credentials"""
         return None
