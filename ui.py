@@ -29,7 +29,7 @@ class UI:
             "RegisterUI": "register_ui"
         }
         self.configure_root()
-        self.switch_frame("MainUI")
+        self.switch_frame("LoginUI")
 
     def get_window_size(self) -> tuple:
         """Returns the size of the user's window as a tuple: (width, height)"""
