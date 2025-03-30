@@ -151,11 +151,15 @@ class MainUI(Frame):
             "padx": 10,
             "pady": 20
         }
-        self.textCorrect: Label = Label(statusBar, text="Correct: 0", fg="#27ae60", anchor="w", **metricStyle)
+        self.textCorrect: Label = Label(
+            statusBar, text=f"Correct: {self.textCounter[0]}", fg="#27ae60", anchor="w", **metricStyle
+        )
         self.textCorrect.grid(row=0, column=0, columnspan=3, sticky="w")
         self.textTimer: Label = Label(statusBar, text="Time: 0", fg="#000000", **metricStyle)
         self.textTimer.grid(row=0, column=3, columnspan=3, sticky="ns")
-        self.textIncorrect: Label = Label(statusBar, text="Incorrect: 0", fg="#c0392b", anchor="e", **metricStyle)
+        self.textIncorrect: Label = Label(
+            statusBar, text=f"Incorrect: {self.textCounter[1]}", fg="#c0392b", anchor="e", **metricStyle
+        )
         self.textIncorrect.grid(row=0, column=6, columnspan=3, sticky="e")
         return None
 
@@ -229,15 +233,15 @@ class MainUI(Frame):
     def clear_test(self) -> None:
         """Clear and set the configurations to the initial ones in order to set ready the next test"""
         self.clear_canvas()
-        self.textTimer.config(text=f"Time: {self.seconds}s")
-        self.textCorrect.config(text="Correct: ")
-        self.textIncorrect.config(text="Incorrect: ")
         self.timer_on = False
         self.test_on = False
         self.textCounter = [0, 0]
         self.wordsList = []
         self.specialsList = []
         self.numbersList = []
+        self.textTimer.config(text=f"Time: {self.seconds}s")
+        self.textCorrect.config(text=f"Correct: {self.textCounter[0]}")
+        self.textIncorrect.config(text=f"Incorrect: {self.textCounter[1]}")
         return None
 
     def clear_canvas(self) -> None:
