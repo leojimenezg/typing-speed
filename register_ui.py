@@ -87,12 +87,12 @@ class RegisterUI(Frame):
         email = self.inputEmail.get()
         username = self.inputUser.get()
         password = self.inputPass.get()
-        if len(email) != 0 and len(username) != 0 and len(password) != 0:
-            self.save_all_credentials(email, username, password)
-            messagebox.showinfo(title="Successful registering", message="Credentials successfully saved!")
-            self.clear_form()
-        else:
+        if len(email) == 0 or len(username) == 0 or len(password) == 0:
             messagebox.showerror(title="Error registering", message="Don't leave blank inputs. Try again!")
+            return None
+        self.save_all_credentials(email, username, password)
+        messagebox.showinfo(title="Successful registering", message="Credentials successfully saved!")
+        self.clear_form()
         return None
 
     def save_all_credentials(self, email: str, username: str, password: str) -> None:
