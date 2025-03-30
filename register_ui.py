@@ -102,6 +102,7 @@ class RegisterUI(Frame):
             with open(file=fileName, mode="r") as jsonFile:
                 data: dict = load(jsonFile)
         except FileNotFoundError as e:
+            print(e)
             data: dict = {"users": []}
         credentials: dict = {
             "email": email,
