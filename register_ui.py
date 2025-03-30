@@ -93,6 +93,7 @@ class RegisterUI(Frame):
         self.save_all_credentials(email, username, password)
         messagebox.showinfo(title="Successful registering", message="Credentials successfully saved!")
         self.clear_form()
+        self.switch_to_main()
         return None
 
     def save_all_credentials(self, email: str, username: str, password: str) -> None:
