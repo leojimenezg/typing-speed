@@ -8,7 +8,6 @@ class RegisterUI(Frame):
     def __init__(self, master: Tk, ui):
         super().__init__(master)
         self.ui = ui
-        self.hashObject = sha256()
         self.inputEmail: Entry = cast(Entry, None)
         self.inputUser: Entry = cast(Entry, None)
         self.inputPass: Entry = cast(Entry, None)
@@ -108,17 +107,17 @@ class RegisterUI(Frame):
         credentials: dict = {
             "email": email,
             "username": username,
-            "password": self.hash_password(password).hex()
+            "password": self.hash_password(password)
         }
         data["users"].append(credentials)
         with open(file=fileName, mode="w") as jsonFile:
             dump(data, jsonFile, indent=4)
         return None
 
-    def hash_password(self, password: str) -> bytes:
+    @staticmethod
+    def hash_password(password: str) -> str:
         """Convert the received password into a hash using the SHA256 algorithm and return it"""
-        self.hashObject.update(password.encode("utf-8"))
-        return self.hashObject.digest()
+        return sha256(password.encode("utf-8")).hexdigest()
 
     def clear_form(self) -> None:
         """Clear the form inputs"""
