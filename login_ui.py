@@ -1,23 +1,22 @@
-from tkinter import Frame, Tk, Button, Entry, Label, Event
+from tkinter import Frame, Tk, Button, Entry, Label, Event, END, messagebox
+from hashlib import sha256
 from typing import cast
+from json import load
 
 
 class LoginUI(Frame):
     def __init__(self, master: Tk, ui):
         super().__init__(master)
         self.ui = ui
+        self.hashObject = sha256()
         self.inputUser: Entry = cast(Entry, None)
         self.inputPass: Entry = cast(Entry, None)
         self.bindings: list = [
-            ("<Return>", self.test),
+            ("<Return>", self.check_login_form),
         ]
         self.bindIds: list = []
         self.configure_layout()
         self.create_form()
-
-    def test(self, event: Event):
-        print(f"Bind worked from loginUI {event.keysym}")
-        return None
 
     def configure_layout(self) -> None:
         """Configure the main layout and the grid to be used"""
@@ -67,7 +66,7 @@ class LoginUI(Frame):
             "cursor": "center_ptr"
         }
         btnOptions: list = [
-            ("  Login   ", self.switch_to_main, 4),
+            ("  Login   ", self.check_login_form, 4),
             ("Register", self.switch_to_register, 5)
         ]
         for text, command, row in btnOptions:
@@ -86,6 +85,60 @@ class LoginUI(Frame):
         self.ui.switch_frame(frameClassName="RegisterUI")
         return None
 
-    def check_login_form(self) -> None:
+    def check_login_form(self, event: Event = None) -> None:
         """Check and verify the form inputs in order to validate the credentials"""
+        print(f"Check login form using: {event.keysym if event is not None else 'Button'}")
+        user: str = self.inputUser.get()
+        password: str = self.inputPass.get()
+        if len(user) == 0 or len(password) == 0:
+            messagebox.showerror(title="Error logging in", message="Don't leave blank inputs. Try again!")
+            return None
+        data: dict = self.get_all_credentials()
+        if len(data["users"]) == 0:
+            messagebox.showerror(title="Missing data", message="There are not any credentials saved. Try registering!")
+            return None
+        credentials = None
+        for info in data["users"]:
+            if info["username"] == user:
+                credentials = info
+                break
+        if credentials is None:
+            messagebox.showerror(
+                title="Incorrect credentials",
+                message="The introduced user does not exists or is incorrect. Check again!"
+            )
+            self.clear_form()
+            return None
+        hashedPass = self.hash_password(password)
+        if credentials["password"] != hashedPass:
+            messagebox.showerror(
+                title="Incorrect credentials",
+                message="The introduced password is incorrect. Check again!"
+            )
+            return None
+        messagebox.showinfo(title="Successful login", message="The introduced credentials are valid!")
+        self.switch_to_main()
+        return None
+
+    @staticmethod
+    def get_all_credentials() -> dict:
+        """Get all the credentials saved in the json file and return them as a dictionary"""
+        fileName: str = "local_users_credentials.json"
+        try:
+            with open(file=fileName, mode="r") as jsonFile:
+                data: dict = load(jsonFile)
+        except FileNotFoundError as e:
+            print(e)
+            data: dict = {"users": []}
+        return data
+
+    @staticmethod
+    def hash_password(password: str) -> str:
+        """Convert the received password into a hash using the SHA256 algorithm and return it"""
+        return sha256(password.encode("utf-8")).hexdigest()
+
+    def clear_form(self) -> None:
+        """Clear the form inputs"""
+        self.inputUser.delete(0, END)
+        self.inputPass.delete(0, END)
         return None
