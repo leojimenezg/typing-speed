@@ -1,4 +1,6 @@
-from tkinter import Frame, Tk, Button, Entry, Label, Event
+from tkinter import Frame, Tk, Button, Entry, Label, Event, messagebox, END
+from json import dump, load
+from hashlib import sha256
 from typing import cast
 
 
@@ -6,19 +8,16 @@ class RegisterUI(Frame):
     def __init__(self, master: Tk, ui):
         super().__init__(master)
         self.ui = ui
+        self.hashObject = sha256()
         self.inputEmail: Entry = cast(Entry, None)
         self.inputUser: Entry = cast(Entry, None)
         self.inputPass: Entry = cast(Entry, None)
         self.bindings: list = [
-            ("<Return>", self.test),
+            ("<Return>", self.check_register_form),
         ]
         self.bindIds: list = []
         self.configure_layout()
         self.create_form()
-
-    def test(self, event: Event):
-        print(f"Bind worked from registerUI {event.keysym}")
-        return None
 
     def configure_layout(self) -> None:
         """Configure the main layout and the grid to be used"""
@@ -82,6 +81,46 @@ class RegisterUI(Frame):
         self.ui.switch_frame(frameClassName="MainUI")
         return None
 
-    def check_register_form(self) -> None:
+    def check_register_form(self, event: Event = None) -> None:
         """Check and validate the form inputs in order to create new access credentials"""
+        print(f"Check register form using: {event.keysym if event is not None else 'Button'}")
+        email = self.inputEmail.get()
+        username = self.inputUser.get()
+        password = self.inputPass.get()
+        if len(email) != 0 and len(username) != 0 and len(password) != 0:
+            self.save_all_credentials(email, username, password)
+            messagebox.showinfo(title="Successful registering", message="Credentials successfully saved!")
+            self.clear_form()
+        else:
+            messagebox.showerror(title="Error registering", message="Don't leave blank inputs. Try again!")
+        return None
+
+    def save_all_credentials(self, email: str, username: str, password: str) -> None:
+        """Get the saved credentials, append the new ones and write them all back"""
+        fileName: str = "local_users_credentials.json"
+        try:
+            with open(file=fileName, mode="r") as jsonFile:
+                data: dict = load(jsonFile)
+        except FileNotFoundError as e:
+            data: dict = {"users": []}
+        credentials: dict = {
+            "email": email,
+            "username": username,
+            "password": self.hash_password(password).hex()
+        }
+        data["users"].append(credentials)
+        with open(file=fileName, mode="w") as jsonFile:
+            dump(data, jsonFile, indent=4)
+        return None
+
+    def hash_password(self, password: str) -> bytes:
+        """Convert the received password into a hash using the SHA256 algorithm and return it"""
+        self.hashObject.update(password.encode("utf-8"))
+        return self.hashObject.digest()
+
+    def clear_form(self) -> None:
+        """Clear the form inputs"""
+        self.inputEmail.delete(0, END)
+        self.inputUser.delete(0, END)
+        self.inputPass.delete(0, END)
         return None
