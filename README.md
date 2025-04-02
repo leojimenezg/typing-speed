@@ -25,6 +25,8 @@ The application consists of four main interfaces (Frames), each serving a specif
   1. If all fields are correctly filled, a confirmation message will appear, and you will be redirected to the Typing Test interface.  
   2. If any required fields are missing, an error message will prompt you to complete them.  
 
+![Register Interface](interface_images/register_ui.png)
+
 ### 2. Log In  
 - Allows registered users to access their profiles using valid credentials.  
 - The login process requires:  
@@ -38,6 +40,8 @@ The application consists of four main interfaces (Frames), each serving a specif
   2. If the username exists but the password is incorrect, an error message will prompt you to try again.  
   3. If the username does not exist, an error message will appear, and the input fields will be cleared. Ensure that the username is registered before attempting to log in.  
 
+![Register Interface](interface_images/login_ui.png)
+
 ### 3. Profile  
 - Displays user-specific information, such as past test results (history) and best WPM across all available time settings.  
 - Includes three buttons:  
@@ -46,6 +50,8 @@ The application consists of four main interfaces (Frames), each serving a specif
   - `Logout`: Returns to the Login interface.  
   - **Note:** Although both `Login` and `Logout` redirect to the same interface, they are intended to serve different purposes.  
 - Currently, user-specific information is not yet implemented, but it is planned for future updates.
+ 
+![Register Interface](interface_images/profile_ui.png)
 
 ### 4. Typing Test  
 - Displays and manages the typing test by generating random words across four lines, along with a guide at the top of the interface.  
@@ -64,5 +70,7 @@ The application consists of four main interfaces (Frames), each serving a specif
 - When the test ends (timer reaches 0), a summary will display key performance metrics.  
 - To start a new typing test, press the `Escape` or `Esc` key.  
   - **Note:** All previously selected configurations will remain unchanged, so there is no need to reconfigure them.
+
+![Register Interface](interface_images/typing_test_ui.png)
 
 ---
