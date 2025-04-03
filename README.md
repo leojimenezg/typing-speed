@@ -183,3 +183,15 @@ There are three main ways to modify the language settings. These changes are sim
     self.availableLangs: list = ["english", "spanish", "<language>"]
 - **Update a language** - To update an existing language, simply modify the contents of its corresponding `.txt` file. Be sure to maintain both the naming format and content structure.
 - **Delete a language** - To remove a language, delete its `.txt` file and remove its entry from the `self.availableLangs` list in `main_ui.py`.
+
+### Numbers and Specials Configurations
+Modifying the configurations or content available for the typing test follows a process very similar to **Language Configurations**. However, in this case, you only need to update the content of two specific files:
+
+- **Modify Numbers** - Edit the `numbers_file.txt` file, ensuring that:
+  - The naming format remains unchanged.
+  - Each number is placed on a separate line.
+  - Blank spaces are avoided.
+- **Modify Specials** -  Edit the `specials_file.txt` file, making sure that:
+  - The naming format remains unchanged.
+  - Each special character is placed on a separate line.
+  - Blank spaces are avoided.
