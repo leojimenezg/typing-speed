@@ -113,7 +113,7 @@ The general styles include:
 - **Background Color**: The main background color of the application.
 - **Additional Colors**: Colors for buttons, highlights, and other UI components.
 
-To modify these general styles, update the `self.styles` dictionary in the **`ui.py`** file. Currently, this is the code used:
+To modify these general styles, update the `self.styles` dictionary in the `ui.py` file. Currently, this is the code used:
 - ````python
   self.styles: dict = {
       "background_color": "#CCCCCC",
@@ -195,3 +195,28 @@ Modifying the configurations or content available for the typing test follows a 
   - The naming format remains unchanged.
   - Each special character is placed on a separate line.
   - Blank spaces are avoided.
+
+---
+
+## 💡 Notes
+
+- This is the most significant personal project I’ve worked on so far. Because of that, I made sure to understand every part of the code in depth. If you have any doubts, feel free to contact me, and I’ll do my best to help.
+- Some parts of the code might be complex to understand, but I’ve tried to make everything as clear as possible based on my knowledge and skills.
+- The interface design isn’t the best, but the functionality is solid. I enjoy designing UIs, but coding them is not my favorite part, so feel free to improve the design however you like.
+- I plan to implement new features and improve the existing code in the future. However, for now, I want to focus on other projects and continue learning new things.
+
+---
+
+## 📚 Useful Resources  
+
+Here are some helpful resources to better understand the technologies and libraries used in this project:  
+
+- **[Tkinter Documentation](https://docs.python.org/3/library/tk.html)** – Official Python documentation for Tkinter, the GUI library used in this project.  
+- **[Tkinter Frame Documentation](https://tkdocs.com/pyref/frame.html)** – Detailed reference for Tkinter's `Frame` widget, useful for UI structuring.  
+- **[Tkinter Key Names](https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/key-names.html)** – A comprehensive list of key names used in Tkinter for handling keyboard events.  
+- **[Python hashlib Documentation](https://docs.python.org/3/library/hashlib.html)** – Official Python documentation for `hashlib`, which provides secure hash functions.  
+- **[Python importlib Documentation](https://docs.python.org/3/library/importlib.html)** – Documentation for `importlib`, the module used for dynamic imports in Python.  
+
+---
+
+From: *[LeoJimenezG](https://github.com/LeoJimenezG)*
