@@ -74,3 +74,112 @@ The application consists of four main interfaces (Frames), each serving a specif
 ![Register Interface](interface_images/typing_test_ui.png)
 
 ---
+
+## 🪛 Application Configuration
+
+### Interface Configurations
+All interfaces are built using **Tkinter Frames**, but they follow a modular approach by utilizing **sub-Frames** (which are also Tkinter Frames). This modular design makes it easier to modify individual sections of an interface. However, in most cases, modifying a specific section requires adjusting the entire section’s configuration to ensure proper layout and adaptation.
+
+To modify the interfaces, you can update the corresponding sections in any of the following files:
+#### `register_ui.py`
+- **`configure_layout()`** – Sets up the main layout and grid structure.
+- **`create_form()`** – Creates and configures the registration form.
+
+#### `login_ui.py`
+- **`configure_layout()`** – Sets up the main layout and grid structure.
+- **`create_form()`** – Creates and configures the login form.
+
+#### `profile_ui.py`
+- **`configure_layout()`** – Sets up the main layout and grid structure.
+- **`create_top_bar()`** – Creates and configures the top bar with buttons.
+- **`create_metric_displays()`** – Creates and configures widgets to display user metrics.
+
+#### `main_ui.py`
+- **`configure_layout()`** – Sets up the main layout and grid structure.
+- **`create_top_bar()`** – Creates the top navigation bar with buttons and separators.
+- **`create_canvas()`** – Creates and configures the canvas for displaying text.
+- **`create_bottom_bar()`** – Creates and configures the bottom bar to display metrics.
+
+By modifying these functions, you can easily adjust the application's interface to suit your needs.
+
+### Font, Size, and Color Configurations
+All text and graphical elements follow a **centralized style system** defined in a single dictionary. This means that modifying these styles will automatically update all elements that use them. However, this configuration provides only **general styles** and does not cover every element individually. Many specific styles are defined within their respective files.
+
+The general styles include:
+- **Typography**: Font family used across the application.
+- **Font Size**: Default text size for different elements.
+- **Font Color**: Standard text colors.
+- **Font Type**: Bold, italic, or normal styles.
+- **Background Color**: The main background color of the application.
+- **Additional Colors**: Colors for buttons, highlights, and other UI components.
+
+To modify these general styles, update the `self.styles` dictionary in the **`ui.py`** file. Currently, this is the code used:
+- ````python
+  self.styles: dict = {
+      "background_color": "#CCCCCC",
+      "button_font": ("Segoe UI", 20, "normal"),
+      "button_font_color": "#000000",
+      "button_active_color": "#3A5A8C",
+      "canvas_color": "#DfDEDE",
+      "title_label_font": ("Segoe UI", 20, "bold"),
+      "body_label_font": ("Segoe UI", 18, "normal"),
+      "label_font_color": "#000000",
+      "canvas_label_font": ("Segoe UI", 50, "normal"),
+      "canvas_guide_font": ("Segoe UI", 40, "italic"),
+      "guide_font_color": "#50a5ff"
+  }
+
+### Typing Test Configurations
+The typing test includes several configurable options that allow you to modify its behavior. These settings are simple but can significantly impact core functionalities.
+
+All relevant code for these configurations is located in a single file. Below are the key sections you can modify:
+#### `main_ui.py`
+- ```python
+  self.maxChars: dict = {"canvas": 40, "specials": 2, "numbers": 2}
+  
+- **`self.maxChars`** - A dictionary that defines key configuration parameters for text line generation. It includes the following key-value pairs:
+  - "canvas": Specifies the maximum number of characters allowed in a single text line.
+  - "specials": Defines the maximum number of special characters allowed per line when enabled.
+  - "numbers": Sets the maximum number of numerical characters allowed per line when enabled.
+
+- ```python
+  self.bindings: list = [
+      ("<Return>", self.start_typing_test),
+      ("<Escape>", self.finish_typing_test),
+      ("<KeyPress>", self.check_typing),
+  ]
+
+- **`self.bindings`** - A list containing tuples that define key bindings available in the current frame. Each tuple consists of:
+  - "<KeyBind>": The name of the key to be bound. Note that key names may vary depending on the operating system.
+  - "bind_function": The function to be executed when the key is pressed. This function must accept a Tkinter `Event` object as an argument.
+
+- ```python
+  self.forbiddenKeys: list = [
+      "Return", "Escape", "Shift_L", "Shift_R", "Alt_L", "Alt_R", "Caps_Lock", "Control_L", "Control_R",
+      "Delete", "Tab", "BackSpace", "Meta_L", "Meta_R",
+  ]
+
+- **`self.forbiddenKeys`** - A list of key names that are explicitly disabled in the current frame. Pressing these keys will have no effect. Keep in mind that key names may differ based on your operating system.
+
+- ```python
+  self.language: StringVar = StringVar(self)
+  self.language.set("english")
+
+- **`self.language.set()`** - This method initializes the `language` variable with a default language for the typing test. The specified language must be written in lowercase and must be available within the application.
+
+- ```python
+  self.set_time_variable(30)
+  
+- **`self.set_time_variable()`** - This method sets a default duration for the typing test by modifying the `self.seconds` variable. While there are no strict restrictions on the values that can be used, it is highly recommended to choose one of the predefined options (30, 60, 90, or 120) to ensure consistent metric results and avoid unexpected behavior.
+
+### Language Configurations
+There are three main ways to modify the language settings. These changes are simple to implement but not the only possible modifications. The three main actions are: adding a **new language**, **updating an existing language**, or **deleting a language**.
+
+- **Add a language** - To add a new language, follow these three steps:
+  - Create a new `.txt` file in the same directory as the code, using the naming format: `language_words.txt`.
+  - Populate the file with words from the new language, ensuring each word is on a separate line and avoiding blank spaces.
+  - Register the language by adding it to the `self.availableLangs` list in `main_ui.py`:
+  - ```python
+    self.availableLangs: list = ["english", "spanish", "<language>"]
+- **Update a language** - To update an existing language, simply modify the contents of its corresponding `.txt` file. Be sure to maintain both the naming format and content structure.
+- **Delete a language** - To remove a language, delete its `.txt` file and remove its entry from the `self.availableLangs` list in `main_ui.py`.
