@@ -255,19 +255,19 @@ class MainUI(Frame):
 
     def fill_words_list(self) -> None:
         """Get all the words from the txt files corresponding to the received language and store them in a list"""
-        with open(file=f"{self.language.get()}_words.txt", mode="r") as file:
+        with open(file=f"files/{self.language.get()}_words.txt", mode="r") as file:
             self.wordsList: list = [word.replace("\n", "") for word in file.readlines()]
         return None
 
     def fill_specials_list(self) -> None:
         """Get all special characters from the txt file and store them in a list"""
-        with open(file="specials_file.txt", mode="r") as file:
+        with open(file="files/specials_file.txt", mode="r") as file:
             self.specialsList: list = [special.replace("\n", "") for special in file.readlines()]
         return None
 
     def fill_numbers_list(self) -> None:
         """Get all numbers from the txt file and store them in a list"""
-        with open(file="numbers_file.txt", mode="r") as file:
+        with open(file="files/numbers_file.txt", mode="r") as file:
             self.numbersList: list = [number.replace("\n", "") for number in file.readlines()]
         return None
 
