@@ -8,13 +8,12 @@ class LoginUI(Frame):
     def __init__(self, master: Tk, ui):
         super().__init__(master)
         self.ui = ui
-        self.hashObject = sha256()
-        self.inputUser: Entry = cast(Entry, None)
-        self.inputPass: Entry = cast(Entry, None)
+        self.input_username: Entry = cast(Entry, None)
+        self.input_password: Entry = cast(Entry, None)
         self.bindings: list = [
             ("<Return>", self.check_login_form),
         ]
-        self.bindIds: list = []
+        self.binds_id: list = []
         self.configure_layout()
         self.create_form()
 
@@ -29,32 +28,56 @@ class LoginUI(Frame):
         """Set the frame's key bindings and save them for later use"""
         for bind, callback in self.bindings:
             bindId = self.master.bind(bind, callback)
-            self.bindIds.append((bind, bindId))
+            self.binds_id.append((bind, bindId))
         return None
 
     def on_frame_deactivation(self) -> None:
         """Unset the frame's key bindings and clear the list"""
-        for seq, bId in self.bindIds:
+        for seq, bId in self.binds_id:
             self.master.unbind(seq, bId)
-        self.bindIds = []
+        self.binds_id = []
         return None
 
     def create_form(self) -> None:
         """Create and configure the form necessary to login"""
-        formFrame: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", padx=40, pady=60)
-        formFrame.grid(row=0, column=0, sticky="nsew")
-        formFrame.grid_columnconfigure(tuple(range(1)), weight=1)
-        userLabel: Label = Label(formFrame, text="Username", font=self.ui.styles.get("button_font"),
-                                 fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
-        userLabel.grid(row=0, column=0, sticky="nsew", padx=40, pady=(10, 5))
-        self.inputUser: Entry = Entry(formFrame, font=self.ui.styles.get("button_font"))
-        self.inputUser.grid(row=1, column=0, sticky="n", padx=40, pady=20)
-        passLabel: Label = Label(formFrame, text="Password", font=self.ui.styles.get("button_font"),
-                                 fg=self.ui.styles.get("label_font_color"), bg=self.ui.styles.get("background_color"))
-        passLabel.grid(row=2, column=0, sticky="nsew", padx=40, pady=(10, 5))
-        self.inputPass: Entry = Entry(formFrame, font=self.ui.styles.get("button_font"))
-        self.inputPass.grid(row=3, column=0, sticky="n", padx=40, pady=20)
-        buttonsStyles: dict = {
+        form_frame: Frame = Frame(
+            self,
+            bg=self.ui.styles.get("background_color"),
+            relief="flat",
+            padx=40,
+            pady=60
+        )
+        form_frame.grid(row=0, column=0, sticky="nsew")
+        form_frame.grid_columnconfigure(tuple(range(1)), weight=1)
+        user_label: Label = Label(
+            form_frame,
+            text="Username",
+            font=self.ui.styles.get("button_font"),
+            fg=self.ui.styles.get("label_font_color"),
+            bg=self.ui.styles.get("background_color")
+        )
+        user_label.grid(row=0, column=0, sticky="nsew", padx=40, pady=(10, 5))
+        self.input_username: Entry = Entry(
+            form_frame,
+            font=self.ui.styles.get("button_font")
+        )
+        self.input_username.grid(row=1, column=0, sticky="n", padx=40, pady=20)
+        password_label: Label = Label(
+            form_frame,
+            text="Password",
+            font=self.ui.styles.get("button_font"),
+            fg=self.ui.styles.get("label_font_color"),
+            bg=self.ui.styles.get("background_color")
+        )
+        password_label.grid(
+            row=2, column=0, sticky="nsew", padx=40, pady=(10, 5)
+        )
+        self.input_password: Entry = Entry(
+            form_frame,
+            font=self.ui.styles.get("button_font")
+        )
+        self.input_password.grid(row=3, column=0, sticky="n", padx=40, pady=20)
+        button_styles: dict = {
             "bg": self.ui.styles.get("background_color"),
             "fg": self.ui.styles.get("button_font_color"),
             "font": self.ui.styles.get("button_font"),
@@ -65,12 +88,17 @@ class LoginUI(Frame):
             "borderwidth": 0,
             "cursor": "center_ptr"
         }
-        btnOptions: list = [
+        button_options: list = [
             ("  Login   ", self.check_login_form, 4),
             ("Register", self.switch_to_register, 5)
         ]
-        for text, command, row in btnOptions:
-            btn: Button = Button(formFrame, text=text, command=command, **buttonsStyles)
+        for text, command, row in button_options:
+            btn: Button = Button(
+                form_frame,
+                text=text,
+                command=command,
+                **button_styles
+            )
             btn.grid(row=row, column=0, sticky="n", padx=40, pady=(10, 5))
             setattr(self, f"{text}Button", btn)
         return None
@@ -86,16 +114,21 @@ class LoginUI(Frame):
         return None
 
     def check_login_form(self, event: Event = None) -> None:
-        """Check and verify the form inputs in order to validate the credentials"""
-        print(f"Check login form using: {event.keysym if event is not None else 'Button'}")
-        user: str = self.inputUser.get()
-        password: str = self.inputPass.get()
+        """Check the form inputs to validate the credentials"""
+        user: str = self.input_username.get()
+        password: str = self.input_password.get()
         if len(user) == 0 or len(password) == 0:
-            messagebox.showerror(title="Error logging in", message="Don't leave blank inputs. Try again!")
+            messagebox.showerror(
+                title="Error logging in",
+                message="Don't leave blank inputs. Try again!"
+            )
             return None
         data: dict = self.get_all_credentials()
         if len(data["users"]) == 0:
-            messagebox.showerror(title="Missing data", message="There are not any credentials saved. Try registering!")
+            messagebox.showerror(
+                title="Missing data",
+                message="There are not any credentials saved. Try registering!"
+            )
             return None
         credentials = None
         for info in data["users"]:
@@ -105,7 +138,7 @@ class LoginUI(Frame):
         if credentials is None:
             messagebox.showerror(
                 title="Incorrect credentials",
-                message="The introduced user does not exists or is incorrect. Check again!"
+                message="The user does not exist or is incorrect. Check again!"
             )
             self.clear_form()
             return None
@@ -116,16 +149,19 @@ class LoginUI(Frame):
                 message="The introduced password is incorrect. Check again!"
             )
             return None
-        messagebox.showinfo(title="Successful login", message="The introduced credentials are valid!")
+        messagebox.showinfo(
+            title="Successful login",
+            message="The introduced credentials are valid!"
+        )
         self.switch_to_main()
         return None
 
     @staticmethod
     def get_all_credentials() -> dict:
-        """Get all the credentials saved in the json file and return them as a dictionary"""
-        fileName: str = "local_users_credentials.json"
+        """Get all the credentials saved in the json file"""
+        file_name: str = "src/local_users_credentials.json"
         try:
-            with open(file=fileName, mode="r") as jsonFile:
+            with open(file=file_name, mode="r") as jsonFile:
                 data: dict = load(jsonFile)
         except FileNotFoundError as e:
             print(e)
@@ -134,11 +170,11 @@ class LoginUI(Frame):
 
     @staticmethod
     def hash_password(password: str) -> str:
-        """Convert the received password into a hash using the SHA256 algorithm and return it"""
+        """Return the received password as a SHA256 hash"""
         return sha256(password.encode("utf-8")).hexdigest()
 
     def clear_form(self) -> None:
         """Clear the form inputs"""
-        self.inputUser.delete(0, END)
-        self.inputPass.delete(0, END)
+        self.input_username.delete(0, END)
+        self.input_password.delete(0, END)
         return None

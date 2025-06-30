@@ -19,10 +19,10 @@ class UI:
             "canvas_guide_font": ("Segoe UI", 40, "italic"),
             "guide_font_color": "#50a5ff"
         }
-        self.screenWidth: int = self.get_window_size()[0]
-        self.screenHeight: int = self.get_window_size()[1]
-        self.currentFrame: Frame = cast(Frame, None)
-        self.moduleDict: dict = {
+        self.screen_width: int = self.get_window_size()[0]
+        self.screen_height: int = self.get_window_size()[1]
+        self.current_frame: Frame = cast(Frame, None)
+        self.modules: dict = {
             "MainUI": "main_ui",
             "ProfileUI": "profile_ui",
             "LoginUI": "login_ui",
@@ -37,7 +37,7 @@ class UI:
 
     def configure_root(self) -> None:
         """Configures the main Tk object (root) for better visualization"""
-        self.root.geometry(f"{self.screenWidth}x{self.screenHeight}")
+        self.root.geometry(f"{self.screen_width}x{self.screen_height}")
         self.root.state("zoomed")
         self.root.configure(background=self.styles.get("background_color"))
         self.root.resizable(width=False, height=False)
@@ -46,21 +46,28 @@ class UI:
         return None
 
     def switch_frame(self, frameClassName: str) -> None:
-        """Switch the current frame to the specified one, using the class name (str)"""
-        if self.currentFrame is not None:
-            self.currentFrame.on_frame_deactivation()
-            self.currentFrame.destroy()
+        """
+        Switch the current frame to the specified one,
+        using the class name (str)
+        """
+        if self.current_frame is not None:
+            self.current_frame.on_frame_deactivation()
+            self.current_frame.destroy()
         if not isinstance(frameClassName, str):
-            raise ValueError(f"The received value of 'frameClassName' is not a string object: {frameClassName}")
-        moduleName = self.moduleDict.get(frameClassName)
-        if not moduleName:
-            raise ValueError(f"The given class name does not exist or isn't valid: '{frameClassName}'")
-        module = import_module(moduleName)
-        frameClass = getattr(module, frameClassName)
-        self.currentFrame = frameClass(self.root, self)
-        self.currentFrame.on_frame_activation()
-        self.currentFrame.grid(row=0, column=0, sticky="nsew")
-        self.currentFrame.grid_propagate(False)
+            raise ValueError(
+                "The 'frameClassName' value is not a string"
+            )
+        module_name = self.modules.get(frameClassName)
+        if not module_name:
+            raise ValueError(
+                "The class name does not exist or isn't valid"
+            )
+        module = import_module(module_name)
+        module_class = getattr(module, frameClassName)
+        self.current_frame = module_class(self.root, self)
+        self.current_frame.on_frame_activation()
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
+        self.current_frame.grid_propagate(False)
         self.root.update_idletasks()
         return None
 

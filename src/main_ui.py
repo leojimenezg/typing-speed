@@ -1,4 +1,5 @@
-from tkinter import Frame, Tk, Canvas, Label, Button, Event, OptionMenu, StringVar
+from tkinter import Frame, Tk, Canvas, Label, Button
+from tkinter import Event, OptionMenu, StringVar
 from threading import Thread
 from random import choice, randint
 from typing import cast
@@ -11,16 +12,20 @@ class MainUI(Frame):
         super().__init__(master)
         self.ui = ui
         self.canvas: Canvas = cast(Canvas, None)
-        self.canvasTextId: int = 0
-        self.canvasText: str = ""
-        self.canvasTextIndex: int = 0
-        self.canvasGuideId: int = 0
-        self.canvasGuideIndex: int = 1  # Represents the line user is currently
-        self.maxChars: dict = {"canvas": 40, "specials": 2, "numbers": 2}
-        self.textCorrect: Label = cast(Label, None)
-        self.textIncorrect: Label = cast(Label, None)
-        self.textCounter: list = [0, 0]  # [correct, incorrect]
-        self.textTimer: Label = cast(Label, None)
+        self.canvas_text_id: int = 0
+        self.canvas_text: str = ""
+        self.canvas_text_idx: int = 0
+        self.canvas_guide_id: int = 0
+        self.canvas_guide_idx: int = 1  # Represents the line user is currently
+        self.max_chars: dict = {  # Should be dinamically calculated
+            "canvas": 40,
+            "specials": 2,
+            "numbers": 2
+        }
+        self.text_correct: Label = cast(Label, None)
+        self.text_incorrect: Label = cast(Label, None)
+        self.text_counter: list = [0, 0]  # [correct, incorrect]
+        self.text_timer: Label = cast(Label, None)
         self.seconds: int = 0
         self.numbers: bool = False
         self.specials: bool = False
@@ -31,17 +36,18 @@ class MainUI(Frame):
             ("<Escape>", self.finish_typing_test),
             ("<KeyPress>", self.check_typing),
         ]
-        self.forbiddenKeys: list = [
-            "Return", "Escape", "Shift_L", "Shift_R", "Alt_L", "Alt_R", "Caps_Lock", "Control_L", "Control_R",
+        self.no_keys: list = [
+            "Return", "Escape", "Shift_L", "Shift_R", "Alt_L",
+            "Alt_R", "Caps_Lock", "Control_L", "Control_R",
             "Delete", "Tab", "BackSpace", "Meta_L", "Meta_R",
         ]
-        self.bindIds: list = []
-        self.wordsList: list = []
-        self.specialsList: list = []
-        self.numbersList: list = []
+        self.bind_ids: list = []
+        self.words: list = []
+        self.specials: list = []
+        self.numbers: list = []
         self.language: StringVar = StringVar(self)
         self.language.set("english")
-        self.availableLangs: list = ["english", "spanish"]
+        self.languages: list = ["english", "spanish"]
         self.configure_layout()
         self.create_top_bar()
         self.create_canvas()
@@ -60,22 +66,27 @@ class MainUI(Frame):
         """Set the frame's key bindings and save them for later use"""
         for bind, callback in self.bindings:
             bindId = self.master.bind(bind, callback)
-            self.bindIds.append((bind, bindId))
+            self.bind_ids.append((bind, bindId))
         return None
 
     def on_frame_deactivation(self) -> None:
         """Unset the frame's key bindings and clear the list"""
-        for seq, bId in self.bindIds:
+        for seq, bId in self.bind_ids:
             self.master.unbind(seq, bId)
-        self.bindIds = []
+        self.bind_ids = []
         return None
 
     def create_top_bar(self) -> None:
-        """Create the top navigation bar with the necessary buttons and separators"""
-        topBar: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", bd=1)
-        topBar.grid(row=0, column=0, columnspan=10, sticky="ew", pady=20)
-        topBar.grid_columnconfigure(tuple(range(9)), weight=1)
-        buttonsStyles: dict = {
+        """Create the top navigation bar."""
+        top_bar: Frame = Frame(
+            self,
+            bg=self.ui.styles.get("background_color"),
+            relief="flat",
+            bd=1
+        )
+        top_bar.grid(row=0, column=0, columnspan=10, sticky="ew", pady=20)
+        top_bar.grid_columnconfigure(tuple(range(9)), weight=1)
+        btn_styles: dict = {
             "bg": self.ui.styles.get("background_color"),
             "fg": self.ui.styles.get("button_font_color"),
             "font": self.ui.styles.get("button_font"),
@@ -86,81 +97,139 @@ class MainUI(Frame):
             "borderwidth": 0,
             "cursor": "center_ptr"
         }
-        timeBtnConfigs: list = [
+        time_btn_config: list = [
             ("30s", self.set_time_variable, 0, 30),
             ("60s", self.set_time_variable, 1, 60),
             ("90s", self.set_time_variable, 2, 90),
             ("120s", self.set_time_variable, 3, 120)
         ]
-        for text, command, col, secs in timeBtnConfigs:
-            btn: Button = Button(topBar, text=text, command=lambda t=secs, cmd=command: cmd(t), **buttonsStyles)
+        for text, command, col, secs in time_btn_config:
+            btn: Button = Button(
+                top_bar,
+                text=text,
+                command=lambda t=secs, cmd=command: cmd(t),
+                **btn_styles
+            )
             btn.grid(row=0, column=col, sticky="nsew", padx=2, pady=2)
             setattr(self, f"btn{text}", btn)
-        sep1: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
+        sep1: Frame = Frame(
+            top_bar,
+            bg=self.ui.styles.get("background_color"),
+            width=2
+        )
         sep1.grid(row=0, column=4, sticky="ns", padx=5)
         setattr(self, "separator1", sep1)
-        optionMenu: OptionMenu = OptionMenu(topBar, self.language, *self.availableLangs)
-        optionMenu.config(
+        option_menu: OptionMenu = OptionMenu(
+            top_bar,
+            self.language,
+            *self.languages
+        )
+        option_menu.config(
             bg=self.ui.styles.get("background_color"),
-            fg=self.ui.styles.get("button_font_color"), activebackground=self.ui.styles.get("button_active_color"),
+            fg=self.ui.styles.get("button_font_color"),
+            activebackground=self.ui.styles.get("button_active_color"),
             highlightthickness=0, relief="flat", padx=10, pady=5
         )
-        menu = optionMenu.nametowidget(optionMenu.menuname)
+        menu = option_menu.nametowidget(option_menu.menuname)
         menu.config(
-            font=self.ui.styles.get("button_font"), bg=self.ui.styles.get("background_color"),
-            fg=self.ui.styles.get("button_font_color"), activebackground=self.ui.styles.get("button_active_color"),
+            font=self.ui.styles.get("button_font"),
+            bg=self.ui.styles.get("background_color"),
+            fg=self.ui.styles.get("button_font_color"),
+            activebackground=self.ui.styles.get("button_active_color"),
             activeforeground="white", bd=2
         )
-        optionMenu.grid(row=0, column=5, sticky="nsew", padx=2, pady=2)
-        setattr(self, "optionMenu", optionMenu)
-        extraBtnConfigs: list = [
+        option_menu.grid(row=0, column=5, sticky="nsew", padx=2, pady=2)
+        setattr(self, "option_menu", option_menu)
+        extra_btn_config: list = [
             ("Specials", self.set_specials_variable, 6),
             ("Numbers", self.set_numbers_variable, 7)
         ]
-        for text, command, col in extraBtnConfigs:
-            btn: Button = Button(topBar, text=text, command=command, **buttonsStyles)
+        for text, command, col in extra_btn_config:
+            btn: Button = Button(
+                top_bar,
+                text=text,
+                command=command,
+                **btn_styles
+            )
             btn.grid(row=0, column=col, sticky="nsew", padx=2, pady=2)
             setattr(self, f"btn{text}", btn)
-        sep2: Frame = Frame(topBar, bg=self.ui.styles.get("background_color"), width=2)
+        sep2: Frame = Frame(
+            top_bar,
+            bg=self.ui.styles.get("background_color"),
+            width=2
+        )
         sep2.grid(row=0, column=8, sticky="ns", padx=5)
-        setattr(self, f"separator2", sep2)
-        profile: Button = Button(topBar, text="Profile", command=self.switch_to_profile, **buttonsStyles)
+        setattr(self, "separator2", sep2)
+        profile: Button = Button(
+            top_bar,
+            text="Profile",
+            command=self.switch_to_profile,
+            **btn_styles
+        )
         profile.grid(row=0, column=9, sticky="nsew", padx=2, pady=2)
         setattr(self, "btnProfile", profile)
         return None
 
     def create_canvas(self) -> None:
         """Create and configure the canvas to show the corresponding text"""
-        canvasFrame: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="sunken")
-        canvasFrame.grid(row=1, column=0, columnspan=9, sticky="nsew", pady=20)
-        canvasFrame.grid_columnconfigure(0, weight=1)
-        canvasFrame.grid_rowconfigure(0, weight=1)
-        self.canvas: Canvas = Canvas(canvasFrame, bg=self.ui.styles.get("canvas_color"), highlightthickness=0)
+        canvas_frame: Frame = Frame(
+            self,
+            bg=self.ui.styles.get("background_color"),
+            relief="sunken"
+        )
+        canvas_frame.grid(
+            row=1, column=0, columnspan=9, sticky="nsew", pady=20
+        )
+        canvas_frame.grid_columnconfigure(0, weight=1)
+        canvas_frame.grid_rowconfigure(0, weight=1)
+        self.canvas: Canvas = Canvas(
+            canvas_frame,
+            bg=self.ui.styles.get("canvas_color"),
+            highlightthickness=0
+        )
         self.canvas.grid(row=0, column=0, sticky="nsew")
         return None
 
     def create_bottom_bar(self) -> None:
         """Create and configure the bottom bar to show few metrics"""
-        statusBar: Frame = Frame(self, bg=self.ui.styles.get("background_color"), relief="flat", bd=1)
-        statusBar.grid(row=2, column=0, columnspan=9, sticky="ew", pady=20)
+        status_bar: Frame = Frame(
+            self,
+            bg=self.ui.styles.get("background_color"),
+            relief="flat",
+            bd=1
+        )
+        status_bar.grid(row=2, column=0, columnspan=9, sticky="ew", pady=20)
         for i in range(0, 9):
-            statusBar.grid_columnconfigure(i, weight=1)
-        metricStyle: dict = {
+            status_bar.grid_columnconfigure(i, weight=1)
+        metric_styles: dict = {
             "font": self.ui.styles.get("button_font"),
             "bg": self.ui.styles.get("background_color"),
             "padx": 10,
             "pady": 20
         }
-        self.textCorrect: Label = Label(
-            statusBar, text=f"Correct: {self.textCounter[0]}", fg="#27ae60", anchor="w", **metricStyle
+        self.text_correct: Label = Label(
+            status_bar,
+            text=f"Correct: {self.text_counter[0]}",
+            fg="#27ae60",
+            anchor="w",
+            **metric_styles
         )
-        self.textCorrect.grid(row=0, column=0, columnspan=3, sticky="w")
-        self.textTimer: Label = Label(statusBar, text="Time: 0", fg="#000000", **metricStyle)
-        self.textTimer.grid(row=0, column=3, columnspan=3, sticky="ns")
-        self.textIncorrect: Label = Label(
-            statusBar, text=f"Incorrect: {self.textCounter[1]}", fg="#c0392b", anchor="e", **metricStyle
+        self.text_correct.grid(row=0, column=0, columnspan=3, sticky="w")
+        self.text_timer: Label = Label(
+            status_bar,
+            text="Time: 0",
+            fg="#000000",
+            **metric_styles
         )
-        self.textIncorrect.grid(row=0, column=6, columnspan=3, sticky="e")
+        self.text_timer.grid(row=0, column=3, columnspan=3, sticky="ns")
+        self.text_incorrect: Label = Label(
+            status_bar,
+            text=f"Incorrect: {self.text_counter[1]}",
+            fg="#c0392b",
+            anchor="e",
+            **metric_styles
+        )
+        self.text_incorrect.grid(row=0, column=6, columnspan=3, sticky="e")
         return None
 
     def switch_to_profile(self) -> None:
@@ -173,7 +242,7 @@ class MainUI(Frame):
         """Change the time used for the tests"""
         if not self.test_on:
             self.seconds = seconds
-            self.textTimer.config(text=f"Time: {self.seconds}s")
+            self.text_timer.config(text=f"Time: {self.seconds}s")
         return None
 
     def set_numbers_variable(self) -> None:
@@ -193,23 +262,23 @@ class MainUI(Frame):
         self.timer_on = True
 
         def countdown() -> None:
-            remainingTime: int = self.seconds
-            while remainingTime > 0 and self.timer_on:
+            time_left: int = self.seconds
+            while time_left > 0 and self.timer_on:
                 time.sleep(1)
-                remainingTime -= 1
-                self.textTimer.config(text=f"Time: {remainingTime}s")
-            if remainingTime <= 0:
+                time_left -= 1
+                self.text_timer.config(text=f"Time: {time_left}s")
+            if time_left <= 0:
                 self.timer_on = False
                 self.show_test_results()
             return None
 
-        timerThread: Thread = Thread(target=countdown)
-        timerThread.daemon = True
-        timerThread.start()
+        timer_thread: Thread = Thread(target=countdown)
+        timer_thread.daemon = True
+        timer_thread.start()
         return None
 
     def start_typing_test(self, event: Event) -> None:
-        """Start the typing test by setting variables and calling the appropriate functions"""
+        """Start the typing test setting variables and calling functions"""
         if not self.test_on and not self.timer_on:
             print(f"Test started using {event.keysym} key.")
             self.test_on = True
@@ -223,7 +292,7 @@ class MainUI(Frame):
         return None
 
     def finish_typing_test(self, event: Event) -> None:
-        """Finish the typing test only if a typing test has been started and the timer has ended"""
+        """Finish the typing test if it started and timer has ended"""
         if self.test_on and not self.timer_on:
             print(f"Typing test finished using {event.keysym} key.")
             self.test_on = False
@@ -231,212 +300,251 @@ class MainUI(Frame):
         return None
 
     def clear_test(self) -> None:
-        """Clear and set the configurations to the initial ones in order to set ready the next test"""
+        """Clear and set configurations to the initial ones"""
         self.clear_canvas()
         self.timer_on = False
         self.test_on = False
-        self.textCounter = [0, 0]
-        self.wordsList = []
-        self.specialsList = []
-        self.numbersList = []
-        self.textTimer.config(text=f"Time: {self.seconds}s")
-        self.textCorrect.config(text=f"Correct: {self.textCounter[0]}")
-        self.textIncorrect.config(text=f"Incorrect: {self.textCounter[1]}")
+        self.text_counter = [0, 0]
+        self.words = []
+        self.specials = []
+        self.numbers = []
+        self.text_timer.config(text=f"Time: {self.seconds}s")
+        self.text_correct.config(text=f"Correct: {self.text_counter[0]}")
+        self.text_incorrect.config(text=f"Incorrect: {self.text_counter[1]}")
         return None
 
     def clear_canvas(self) -> None:
         """Clear all the canvas content and the related variables to it"""
         self.canvas.delete("all")
-        self.canvasTextId = None
-        self.canvasTextIndex = 0
-        self.canvasGuideId = None
-        self.canvasGuideIndex = 1
+        self.canvas_text_id = None
+        self.canvas_text_idx = 0
+        self.canvas_guide_id = None
+        self.canvas_guide_idx = 1
         return None
 
     def fill_words_list(self) -> None:
-        """Get all the words from the txt files corresponding to the received language and store them in a list"""
-        with open(file=f"files/{self.language.get()}_words.txt", mode="r") as file:
-            self.wordsList: list = [word.replace("\n", "") for word in file.readlines()]
+        """Get the words from the files/{language}_words.txt file"""
+        with open(
+            file=f"files/{self.language.get()}_words.txt", mode="r"
+        ) as file:
+            # A line has only one word.
+            self.words: list = [
+                word.replace("\n", "") for word in file.readlines()
+            ]
         return None
 
     def fill_specials_list(self) -> None:
-        """Get all special characters from the txt file and store them in a list"""
-        with open(file="files/specials_file.txt", mode="r") as file:
-            self.specialsList: list = [special.replace("\n", "") for special in file.readlines()]
+        """Get the special characters from the files/specials_file.txt file"""
+        with open(
+            file="files/specials_file.txt", mode="r"
+        ) as file:
+            # A line has only one special character.
+            self.specials: list = [
+                special.replace("\n", "") for special in file.readlines()
+            ]
         return None
 
     def fill_numbers_list(self) -> None:
-        """Get all numbers from the txt file and store them in a list"""
-        with open(file="files/numbers_file.txt", mode="r") as file:
-            self.numbersList: list = [number.replace("\n", "") for number in file.readlines()]
+        """Get the number characters from the files/numbers_file.txt file"""
+        with open(
+            file="files/numbers_file.txt", mode="r"
+        ) as file:
+            # A line has only one number character.
+            self.numbers: list = [
+                number.replace("\n", "") for number in file.readlines()
+            ]
         return None
 
     def get_random_word(self) -> str:
         """Return a random word from the initialized list"""
-        return choice(self.wordsList)
+        return choice(self.words)
 
     def get_randon_special(self) -> str:
         """Return a random special character from the initialized list"""
-        return choice(self.specialsList)
+        return choice(self.specials)
 
     def get_random_number(self) -> str:
         """Return a random number from the initialized list"""
-        return choice(self.numbersList)
+        return choice(self.numbers)
 
     def create_text_line(self) -> str:
-        """Return a created line with the right amount of random words in order to be display in the canvas"""
+        """Return a line with random words to be displayed in the canvas"""
         line: list = []
-        totalLength: int = 0
-        lastWord = self.get_random_word()
-        line.append(lastWord)
-        totalLength += len(lastWord)
-        while totalLength < self.maxChars.get("canvas"):
+        line_length: int = 0
+        last_word = self.get_random_word()
+        line.append(last_word)
+        line_length += len(last_word)
+        while line_length < self.max_chars.get("canvas"):
             word = self.get_random_word()
-            if word != lastWord:
-                if (totalLength + len(word)) < self.maxChars.get("canvas"):
+            if word != last_word:
+                if (line_length + len(word)) < self.max_chars.get("canvas"):
                     line.append(word)
-                    totalLength += len(word)
-                    lastWord = word
+                    line_length += len(word)
+                    last_word = word
                 else:
-                    totalLength += 1
+                    line_length += 1
         if self.specials and self.numbers:
             counter: int = 0
-            lineLength: int = len(line) - 1
-            while counter < self.maxChars.get("specials") + self.maxChars.get("numbers"):
-                randIndex = randint(0, lineLength)
-                if line[randIndex] in self.wordsList:
-                    if counter % 2 == 0:
-                        line[randIndex] = self.get_randon_special()
-                    else:
-                        line[randIndex] = self.get_random_number()
-                    counter += 1
+            line_length: int = len(line) - 1
+            while (
+                    counter < self.max_chars.get("specials")
+                    + self.max_chars.get("numbers")
+            ):
+                random_idx = randint(0, line_length)
+                if counter % 2 == 0:
+                    line[random_idx] = self.get_randon_special()
                 else:
-                    pass
+                    line[random_idx] = self.get_random_number()
+                counter += 1
         elif self.specials:
             counter: int = 0
-            lineLength: int = len(line) - 1
-            while counter < self.maxChars.get("specials"):
-                randIndex = randint(0, lineLength)
-                if line[randIndex] in self.wordsList:
-                    line[randIndex] = self.get_randon_special()
-                    counter += 1
-                else:
-                    pass
+            line_length: int = len(line) - 1
+            while counter < self.max_chars.get("specials"):
+                random_idx = randint(0, line_length)
+                line[random_idx] = self.get_randon_special()
+                counter += 1
         elif self.numbers:
             counter: int = 0
-            lineLength: int = len(line) - 1
-            while counter < self.maxChars.get("numbers"):
-                randIndex = randint(0, lineLength)
-                if line[randIndex] in self.wordsList:
-                    line[randIndex] = self.get_random_number()
-                    counter += 1
-                else:
-                    pass
+            line_length: int = len(line) - 1
+            while counter < self.max_chars.get("numbers"):
+                random_idx = randint(0, line_length)
+                line[random_idx] = self.get_random_number()
+                counter += 1
         return " ".join(line)
 
     def typing_test_text(self) -> None:
         """Initialize and create the text in the canvas for the typing test"""
-        textLines = [
-            self.create_text_line(), self.create_text_line(), self.create_text_line(), self.create_text_line()
+        text_lines = [
+            self.create_text_line(),
+            self.create_text_line(),
+            self.create_text_line(),
+            self.create_text_line(),
         ]
-        fullText = "\n\n".join(textLines)
-        self.canvasText = fullText
-        self.canvasTextId = self.canvas.create_text(
-            700, 370, text=fullText, font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color"), justify="center"
+        full_text = "\n\n".join(text_lines)
+        self.canvas_text = full_text
+        self.canvas_text_id = self.canvas.create_text(
+            700, 370,  # Should be dinamically calculated
+            text=full_text,
+            font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"),
+            justify="center"
         )
         self.typing_test_guide()
         return None
 
     def typing_test_guide(self) -> None:
         """Initialize and create the guide in the canvas for the typing text"""
-        guide: str = f"Line: {self.canvasGuideIndex}   "
-        guide += f"Next character: {self.canvasText[self.canvasTextIndex]}"
-        self.canvasGuideId = self.canvas.create_text(
-            700, 80, text=guide, font=self.ui.styles.get("canvas_guide_font"),
-            fill=self.ui.styles.get("guide_font_color"), justify="center"
+        guide: str = f"Line: {self.canvas_guide_idx}   "
+        guide += f"Next character: {self.canvas_text[self.canvas_text_idx]}"
+        self.canvas_guide_id = self.canvas.create_text(
+            700, 80,
+            text=guide,
+            font=self.ui.styles.get("canvas_guide_font"),
+            fill=self.ui.styles.get("guide_font_color"),
+            justify="center"
         )
         return None
 
     def check_typing(self, event: Event) -> None:
-        """Check the canvas text when a key is pressed to compare if the key is correct or not"""
+        """Compare the canvas text with the pressed key"""
         if self.test_on and self.timer_on:
-            if event.keysym in self.forbiddenKeys:
+            if event.keysym in self.no_keys:
                 return None
-            while self.canvasText[self.canvasTextIndex] == "\n":
-                self.canvasTextIndex += 1
-            if event.char == self.canvasText[self.canvasTextIndex]:
-                self.textCounter[0] += 1
+            while self.canvas_text[self.canvas_text_idx] == "\n":
+                self.canvas_text_idx += 1
+            if event.char == self.canvas_text[self.canvas_text_idx]:
+                self.text_counter[0] += 1  # Correct
                 self.update_text_counter(0)
             else:
-                self.textCounter[1] += 1
+                self.text_counter[1] += 1  # Incorrect
                 self.update_text_counter(1)
-            self.canvasTextIndex += 1
-            if self.canvasTextIndex >= len(self.canvasText):
+            self.canvas_text_idx += 1
+            if self.canvas_text_idx >= len(self.canvas_text):
                 self.clear_canvas()
                 self.typing_test_text()
             self.update_guide()
         return None
 
     def update_text_counter(self, index: int) -> None:
-        """Update the text labels that show the correct and incorrect counters, according to the received index"""
+        """Update the correct/incorrect text according to the received index"""
         if index == 0:
-            self.textCorrect.config(text=f"Correct: {self.textCounter[index]}")
+            self.text_correct.config(
+                text=f"Correct: {self.text_counter[index]}"
+            )
         else:
-            self.textIncorrect.config(text=f"Incorrect: {self.textCounter[index]}")
+            self.text_incorrect.config(
+                text=f"Incorrect: {self.text_counter[index]}"
+            )
         return None
 
     def update_guide(self) -> None:
         """Update the canvas text guide as a whole single text"""
-        textIndex = self.canvasTextIndex
-        if self.canvasText[textIndex] == "\n":
-            textIndex += 2
-            self.canvasGuideIndex += 1
-        updatedGuide: str = f"Line: {self.canvasGuideIndex}   "
-        updatedGuide += f"Next character: {self.canvasText[textIndex]}"
-        self.canvas.itemconfig(self.canvasGuideId, text=updatedGuide)
+        text_idx = self.canvas_text_idx
+        if self.canvas_text[text_idx] == "\n":
+            text_idx += 2
+            self.canvas_guide_idx += 1
+        updated_guide: str = f"Line: {self.canvas_guide_idx}   "
+        updated_guide += f"Next character: {self.canvas_text[text_idx]}"
+        self.canvas.itemconfig(self.canvas_guide_id, text=updated_guide)
         return None
 
     def show_test_results(self) -> None:
-        """Show in the canvas the results of the typing test once the timer is finished"""
+        """Show in the canvas the results of the typing test"""
         self.clear_canvas()
         language: str = f"Language: {self.language.get()}"
         self.canvas.create_text(
-            400, 200, text=language, font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color"), justify="center"
+            400, 200,
+            text=language,
+            font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"),
+            justify="center"
         )
-        incorrect: str = f"Incorrect: {self.textCounter[1]}"
+        incorrect: str = f"Incorrect: {self.text_counter[1]}"
         self.canvas.create_text(
-            400, 400, text=incorrect, font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color"), justify="center"
+            400, 400,
+            text=incorrect,
+            font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"),
+            justify="center"
         )
 
-        raw: str = f"Raw: {self.textCounter[0] + self.textCounter[1]}"
+        raw: str = f"Raw: {self.text_counter[0] + self.text_counter[1]}"
         self.canvas.create_text(
-            750, 200, text=raw, font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color"), justify="center"
+            750, 200,
+            text=raw,
+            font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"),
+            justify="center"
         )
         wpm: str = f"WPM: {self.calculate_wpm()}"
         self.canvas.create_text(
-            750, 400, text=wpm, font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color"), justify="center"
+            750, 400,
+            text=wpm, font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"),
+            justify="center"
         )
 
         seconds: str = f"Seconds: {self.seconds}"
         self.canvas.create_text(
-            1100, 200, text=seconds, font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color"), justify="center"
+            1100, 200,
+            text=seconds,
+            font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"),
+            justify="center"
         )
-        correct: str = f"Correct: {self.textCounter[0]}"
+        correct: str = f"Correct: {self.text_counter[0]}"
         self.canvas.create_text(
-            1100, 400, text=correct, font=self.ui.styles.get("canvas_label_font"),
-            fill=self.ui.styles.get("label_font_color"), justify="center"
+            1100, 400,
+            text=correct,
+            font=self.ui.styles.get("canvas_label_font"),
+            fill=self.ui.styles.get("label_font_color"),
+            justify="center"
         )
         return None
 
     def calculate_wpm(self) -> int:
-        """Calculate the wpm using the total of correct characters written in the selected time"""
-        if self.textCounter[0] != 0:
-            wpm = floor((self.textCounter[0] / 5) * (60 / self.seconds))
+        """Calculate the wpm"""
+        if self.text_counter[0] != 0:
+            wpm = floor((self.text_counter[0] / 5) * (60 / self.seconds))
             return wpm
         return 0
