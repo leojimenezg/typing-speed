@@ -15,7 +15,7 @@ Before anything else, make sure you have installed **Python 3.x** or more in you
 1. **Clone the repository:**
 Open your prefered terminal and clone the project to your local machine.
     ```bash
-    git clone https://github.com/LeoJimenezG/typing-speed.git
+    git clone https://github.com/leojimenezg/typing-speed.git
     ```
 2.  **Navigate into the project directory:**
     ```bash
@@ -24,7 +24,7 @@ Open your prefered terminal and clone the project to your local machine.
 3. **Create a Virtual Environment (Recommended):**
     * Create the virtual environment:
         ```bash
-        python -m venv .venv
+        python3 -m venv .venv
         ```
     * Activate the virtual environment:
         * **On macOS / Linux:**
@@ -40,7 +40,7 @@ With your virtual environment activated, install all the required libraries usin
 5. **Run the Application:**
 Finally, execute the main script to launch the Typing Speed Application:
     ```bash
-    python main.py
+    python3 src/main.py
     ```
 ---
 
